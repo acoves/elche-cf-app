@@ -14,6 +14,8 @@ class MatchRepositoryImpl(
 ) : MatchRepository {
     override suspend fun getNextMatch(): Match? = dataSource.fetchNextMatch()
 
+    override suspend fun getSeasonMatches(): List<Match> = dataSource.fetchSeasonMatches()
+
     override suspend fun submitPrediction(prediction: Prediction): AppResult<Unit, AppError> =
         dataSource.sendPrediction(prediction)
 }

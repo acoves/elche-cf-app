@@ -6,7 +6,6 @@ import es.elchecf.app.data.MatchDataSource
 import es.elchecf.app.domain.model.Match
 import es.elchecf.app.domain.model.MatchStatus
 import es.elchecf.app.domain.model.Prediction
-import es.elchecf.app.domain.model.Team
 import kotlinx.coroutines.delay
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -14,36 +13,41 @@ import kotlin.time.Duration.Companion.hours
 
 // FASE 4: datos de ejemplo, no oficiales del club (CLAUDE.md §10 — sin escudos/assets reales sin permiso).
 // FASE 8: se sustituye por una fuente Ktor real; MatchRepository no cambia.
-private val elche =
-    Team(
-        id = "elche-cf",
-        name = "Elche CF",
-        shortName = "ELCHE",
-        crestUrl = "",
-        primaryColorHex = "#05642C",
-    )
+private val elche = DemoTeams.elche
 
-private val rival =
-    Team(
-        id = "rival-demo",
-        name = "Real Madrid",
-        shortName = "R. MADRID",
-        crestUrl = "",
-        primaryColorHex = "#1B458F",
-    )
+// FASE 5: partidos de la temporada de ejemplo, repartidos cada ~9 días desde hoy.
+private val seasonMatches: List<Match> =
+    listOf(
+        DemoTeams.realMadrid to false,
+        DemoTeams.barcelona to true,
+        DemoTeams.sevilla to false,
+        DemoTeams.villarreal to true,
+        DemoTeams.athleticClub to false,
+        DemoTeams.realBetis to true,
+        DemoTeams.valencia to false,
+        DemoTeams.celtaVigo to true,
+    ).mapIndexed { index, (rival, isHome) ->
+        val kickoff = Clock.System.now() + (3 + index * 9).days + 2.hours
+        Match(
+            id = "demo-match-${index + 1}",
+            home = if (isHome) elche else rival,
+            away = if (isHome) rival else elche,
+            kickoffInstant = kickoff,
+            competition = "LaLiga",
+            venue = if (isHome) "Martínez Valero" else "Estadio ${rival.shortName}",
+            status = MatchStatus.Scheduled,
+        )
+    }
 
 class MockMatchDataSource : MatchDataSource {
     override suspend fun fetchNextMatch(): Match {
         delay(NETWORK_DELAY_MS)
-        return Match(
-            id = "demo-match-1",
-            home = elche,
-            away = rival,
-            kickoffInstant = Clock.System.now() + 3.days + 2.hours,
-            competition = "LaLiga",
-            venue = "Martínez Valero",
-            status = MatchStatus.Scheduled,
-        )
+        return seasonMatches.first()
+    }
+
+    override suspend fun fetchSeasonMatches(): List<Match> {
+        delay(NETWORK_DELAY_MS)
+        return seasonMatches
     }
 
     override suspend fun sendPrediction(prediction: Prediction): AppResult<Unit, AppError> = AppResult.Success(Unit)

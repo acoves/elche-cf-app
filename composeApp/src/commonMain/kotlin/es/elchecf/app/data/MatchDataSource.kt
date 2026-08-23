@@ -12,5 +12,7 @@ import es.elchecf.app.domain.model.Prediction
 interface MatchDataSource {
     suspend fun fetchNextMatch(): Match?
 
+    suspend fun fetchSeasonMatches(): List<Match>
+
     suspend fun sendPrediction(prediction: Prediction): AppResult<Unit, AppError>
 }

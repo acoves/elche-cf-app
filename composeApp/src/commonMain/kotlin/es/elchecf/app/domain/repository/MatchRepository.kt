@@ -8,5 +8,8 @@ import es.elchecf.app.domain.model.Prediction
 interface MatchRepository {
     suspend fun getNextMatch(): Match?
 
+    /** CLAUDE.md §5.2: calendario mensual — todos los partidos de la temporada de ejemplo. */
+    suspend fun getSeasonMatches(): List<Match>
+
     suspend fun submitPrediction(prediction: Prediction): AppResult<Unit, AppError>
 }
