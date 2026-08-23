@@ -9,7 +9,9 @@ plugins {
 
 kotlin {
     android {
-        namespace = "es.elchecf.app"
+        // Distinto del namespace de androidApp (es.elchecf.app): AGP no permite que
+        // una app y la librería de la que depende compartan namespace/paquete de R.
+        namespace = "es.elchecf.app.shared"
         compileSdk = 37
         minSdk = 26
 
