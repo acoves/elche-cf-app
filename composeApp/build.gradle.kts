@@ -74,6 +74,9 @@ kotlin {
 
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
         }
         androidMain.dependencies {
             // FASE 1: sin dependencias Android-only propias todavía (koin-android vive en androidApp)
