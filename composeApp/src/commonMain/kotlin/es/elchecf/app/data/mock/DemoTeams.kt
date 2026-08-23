@@ -5,7 +5,7 @@ import es.elchecf.app.domain.model.Team
 // FASE 5: nombres de clubes reales usados como datos de ejemplo de texto plano (sin escudos ni
 // tipografía oficial — CLAUDE.md §10). Se sustituye por datos reales en Fase 8.
 internal object DemoTeams {
-    val elche = Team("elche-cf", "Elche CF", "ELCHE", "", "#05642C")
+    val elche = Team(Team.ELCHE_ID, "Elche CF", "ELCHE", "", "#05642C")
     val realMadrid = Team("real-madrid", "Real Madrid", "R. MADRID", "", "#1B458F")
     val barcelona = Team("barcelona", "FC Barcelona", "BARÇA", "", "#A50044")
     val atleticoMadrid = Team("atletico-madrid", "Atlético de Madrid", "ATLÉTICO", "", "#CB3524")

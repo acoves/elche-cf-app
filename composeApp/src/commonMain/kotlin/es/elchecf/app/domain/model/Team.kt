@@ -7,4 +7,9 @@ data class Team(
     val shortName: String,
     val crestUrl: String,
     val primaryColorHex: String,
-)
+) {
+    companion object {
+        /** App oficiosa de un solo club: sirve para distinguir "nosotros" en Match.home/away. */
+        const val ELCHE_ID = "elche-cf"
+    }
+}
