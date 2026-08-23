@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 1** (2026-08-23).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 2** (2026-08-23).
 
 ---
 
@@ -276,7 +276,7 @@ Notas de diseño de red (Fase 8):
 | Fase | Contenido | Estado |
 |------|-----------|--------|
 | 1 | Setup: `settings.gradle.kts`, `libs.versions.toml`, `build.gradle.kts`, targets, estructura de carpetas, `initKoin`, app corriendo en Android e iOS con una pantalla vacía | **completada** — Android verificado (emulador, screenshot); iOS escrito y sin verificar (sin Mac, ver §12) |
-| 2 | UI Kit: `ElcheTheme` (colores, tipografías, formas), componentes base (botón, card, franja, section header, top bar) + previews | pendiente |
+| 2 | UI Kit: `ElcheTheme` (colores, tipografías, formas), componentes base (botón, card, franja, section header, top bar) + previews | **completada** — verificado en emulador Android |
 | 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | pendiente |
 | 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | pendiente |
 | 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | pendiente |
@@ -337,3 +337,10 @@ Notas de diseño de red (Fase 8):
 - Verificado en emulador Android (Pixel 10 Pro XL): instala, arranca, muestra "Elche CF".
 - Entry point iOS (`MainViewController.kt`, `iOSApp.swift`, `ContentView.swift`, `Info.plist`) escrito, sin verificar — no hay Mac disponible.
 - ktlint (`org.jlleitschuh.gradle.ktlint`) + `.editorconfig`, `ktlintCheck` en verde.
+
+### Fase 2 — 2026-08-23
+
+- `designsystem/theme`: `ElcheColor` (paleta §4.1), `ElcheColorScheme` (light + dark sin pulir), `ElcheShape` (20/24/28dp + pill), `ElcheSpacing` (4→48), `ElcheTypography` (displayL/M, titleL/M, body, bodyS, label, monoNum) + `ElcheTheme`.
+- Fuentes OFL descargadas de google/fonts: Barlow Condensed SemiBold/Bold (titulares) e Inter variable con pesos 400/500/600 vía `FontVariation` (soportado en iOS/desktop desde CMP 1.8, confirmado antes de usarlo).
+- `designsystem/component`: `ElcheButton` (variantes Primary/Accent), `ElcheCard`, `Franja`, `SectionHeader`, `ElcheTopBar`, cada uno con `@Preview`.
+- Verificado en emulador Android con una galería temporal en `App()` (se sustituye en Fase 3).
