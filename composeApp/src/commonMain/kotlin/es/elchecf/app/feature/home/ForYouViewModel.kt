@@ -32,15 +32,22 @@ class ForYouViewModel(
 
     private fun loadMatch() {
         viewModelScope.launch {
-            val match = matchRepository.getNextMatch()
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    match = match,
-                    // FASE 4: sin backend de quiz todavía, puntuación de ejemplo fija.
-                    quizScore = if (match != null) 3 to 5 else null,
-                    showValorateMatch = match?.isRecentlyFinished(Clock.System.now()) == true,
-                )
+            when (val result = matchRepository.getNextMatch()) {
+                is AppResult.Success -> {
+                    val match = result.value
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = null,
+                            match = match,
+                            // FASE 4: sin backend de quiz todavía, puntuación de ejemplo fija.
+                            quizScore = if (match != null) 3 to 5 else null,
+                            showValorateMatch = match?.isRecentlyFinished(Clock.System.now()) == true,
+                        )
+                    }
+                }
+                is AppResult.Failure ->
+                    _uiState.update { it.copy(isLoading = false, error = "No se pudo cargar el próximo partido.") }
             }
         }
     }

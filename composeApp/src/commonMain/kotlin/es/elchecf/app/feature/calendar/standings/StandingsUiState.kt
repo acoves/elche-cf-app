@@ -6,6 +6,7 @@ import es.elchecf.app.domain.repository.Competition
 
 data class StandingsUiState(
     val isLoading: Boolean = true,
+    val error: String? = null,
     val selectedCompetition: Competition = Competition.LaLiga,
     val standings: List<StandingRow> = emptyList(),
     val cupBracket: List<CupTie> = emptyList(),

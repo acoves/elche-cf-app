@@ -57,6 +57,14 @@ fun StandingsScreen(
                 }
             }
 
+            if (uiState.error != null) {
+                Text(
+                    text = uiState.error,
+                    style = ElcheTheme.typography.bodyS,
+                    modifier = Modifier.padding(horizontal = ElcheSpacing.lg),
+                )
+            }
+
             when (uiState.selectedCompetition) {
                 Competition.LaLiga -> StandingsTable(uiState.standings)
                 Competition.Copa -> CupBracketView(uiState.cupBracket)

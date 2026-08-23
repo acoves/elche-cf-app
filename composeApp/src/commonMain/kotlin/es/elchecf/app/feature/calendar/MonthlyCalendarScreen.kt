@@ -71,6 +71,13 @@ fun MonthlyCalendarScreen(
             .associateBy { dayOfMonthOf(it) }
 
     Column(modifier = Modifier.fillMaxWidth().padding(ElcheSpacing.lg)) {
+        if (uiState.error != null) {
+            Text(
+                text = uiState.error,
+                style = ElcheTheme.typography.bodyS,
+                modifier = Modifier.padding(bottom = ElcheSpacing.md),
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

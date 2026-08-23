@@ -54,6 +54,10 @@ fun ForYouScreen(
         val match = uiState.match
         when {
             uiState.isLoading -> Text(text = "Cargando…", style = ElcheTheme.typography.bodyS)
+            // Un error de carga (sin partido) bloquea la pantalla; un error de acción (p.ej. al
+            // enviar la predicción, con partido ya cargado) solo se muestra como aviso más abajo.
+            match == null && uiState.error != null ->
+                Text(text = uiState.error, style = ElcheTheme.typography.bodyS)
             match == null -> Text(text = "No hay próximo partido programado.", style = ElcheTheme.typography.bodyS)
             else -> {
                 VersusCard(
@@ -77,6 +81,13 @@ fun ForYouScreen(
                     ValorateMatchCard(
                         onValorarClick = onValorarClick,
                         modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                    )
+                }
+                if (uiState.error != null) {
+                    Text(
+                        text = uiState.error,
+                        style = ElcheTheme.typography.bodyS,
+                        modifier = Modifier.padding(top = ElcheSpacing.md),
                     )
                 }
             }

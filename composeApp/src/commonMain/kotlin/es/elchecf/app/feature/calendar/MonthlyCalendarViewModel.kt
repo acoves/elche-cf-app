@@ -2,6 +2,7 @@ package es.elchecf.app.feature.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import es.elchecf.app.core.result.AppResult
 import es.elchecf.app.domain.repository.MatchRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,8 +18,11 @@ class MonthlyCalendarViewModel(
 
     init {
         viewModelScope.launch {
-            val matches = matchRepository.getSeasonMatches()
-            _uiState.update { it.copy(isLoading = false, matches = matches) }
+            when (val result = matchRepository.getSeasonMatches()) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false, matches = result.value) }
+                is AppResult.Failure ->
+                    _uiState.update { it.copy(isLoading = false, error = "No se pudo cargar el calendario.") }
+            }
         }
     }
 

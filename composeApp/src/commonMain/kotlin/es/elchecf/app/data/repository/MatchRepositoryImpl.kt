@@ -7,14 +7,14 @@ import es.elchecf.app.domain.model.Match
 import es.elchecf.app.domain.model.Prediction
 import es.elchecf.app.domain.repository.MatchRepository
 
-// FASE 4: delega 1:1 en el data source, sin mapper (el mock ya produce modelos de dominio).
-// FASE 8: el data source real devuelve DTOs y este repositorio pasa a mapearlos.
+// FASE 8: delega 1:1 en el data source (mock o Ktor real, ver Koin). El mapeo DTO→dominio vive
+// en el data source real; este repositorio no conoce DTOs.
 class MatchRepositoryImpl(
     private val dataSource: MatchDataSource,
 ) : MatchRepository {
-    override suspend fun getNextMatch(): Match? = dataSource.fetchNextMatch()
+    override suspend fun getNextMatch(): AppResult<Match?, AppError> = dataSource.fetchNextMatch()
 
-    override suspend fun getSeasonMatches(): List<Match> = dataSource.fetchSeasonMatches()
+    override suspend fun getSeasonMatches(): AppResult<List<Match>, AppError> = dataSource.fetchSeasonMatches()
 
     override suspend fun submitPrediction(prediction: Prediction): AppResult<Unit, AppError> =
         dataSource.sendPrediction(prediction)

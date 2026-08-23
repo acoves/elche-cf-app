@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -78,14 +79,55 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.webview.multiplatform)
+
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
         }
         androidMain.dependencies {
-            // FASE 1: sin dependencias Android-only propias todavía (koin-android vive en androidApp)
+            implementation(libs.ktor.client.android)
         }
         iosMain.dependencies {
-            // FASE 1 (iOS): sin dependencias adicionales todavía; Ktor Darwin llega en Fase 8
+            implementation(libs.ktor.client.darwin)
         }
     }
 
     jvmToolchain(17)
+}
+
+// FASE 8: genera un objeto Kotlin con la API key leída de local.properties (nunca committeado,
+// ver CLAUDE.md §6) para que composeApp la use sin hardcodearla ni exponerla en el repo.
+val generateApiKeys =
+    tasks.register("generateApiKeys") {
+        val localProps = Properties()
+        val localPropsFile = rootProject.file("local.properties")
+        if (localPropsFile.exists()) {
+            localProps.load(localPropsFile.inputStream())
+        }
+        val apiKey = localProps.getProperty("FOOTBALL_DATA_API_KEY", "")
+        // Raíz del source set generado; el paquete real es una subcarpeta de este directorio.
+        val outputDir = layout.buildDirectory.dir("generated/apiKeys")
+
+        inputs.property("footballDataApiKey", apiKey)
+        outputs.dir(outputDir)
+
+        doLast {
+            val packageDir = outputDir.get().asFile.resolve("es/elchecf/app/core/network")
+            packageDir.mkdirs()
+            File(packageDir, "ApiKeys.kt").writeText(
+                """
+                package es.elchecf.app.core.network
+
+                // Generado por :composeApp:generateApiKeys — no editar a mano, no se versiona.
+                internal object ApiKeys {
+                    const val FOOTBALL_DATA_API_KEY: String = "$apiKey"
+                }
+                """.trimIndent(),
+            )
+        }
+    }
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir(generateApiKeys.map { it.outputs.files.singleFile })
 }

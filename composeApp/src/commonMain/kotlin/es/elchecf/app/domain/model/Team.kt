@@ -9,7 +9,9 @@ data class Team(
     val primaryColorHex: String,
 ) {
     companion object {
-        /** App oficiosa de un solo club: sirve para distinguir "nosotros" en Match.home/away. */
-        const val ELCHE_ID = "elche-cf"
+        /** App oficiosa de un solo club: sirve para distinguir "nosotros" en Match.home/away.
+         * FASE 8: coincide con el id real de Elche CF en football-data.org (antes "elche-cf",
+         * un valor de mock que nunca podía igualar el id numérico que llega de la API real). */
+        const val ELCHE_ID = "285"
     }
 }

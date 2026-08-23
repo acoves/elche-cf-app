@@ -10,9 +10,9 @@ import es.elchecf.app.domain.model.Prediction
  * fuente Ktor: cambiar de mock a real es cambiar el binding en el módulo de Koin (CLAUDE.md §0.7).
  */
 interface MatchDataSource {
-    suspend fun fetchNextMatch(): Match?
+    suspend fun fetchNextMatch(): AppResult<Match?, AppError>
 
-    suspend fun fetchSeasonMatches(): List<Match>
+    suspend fun fetchSeasonMatches(): AppResult<List<Match>, AppError>
 
     suspend fun sendPrediction(prediction: Prediction): AppResult<Unit, AppError>
 }

@@ -1,5 +1,7 @@
 package es.elchecf.app.data.mock
 
+import es.elchecf.app.core.result.AppError
+import es.elchecf.app.core.result.AppResult
 import es.elchecf.app.data.StandingsDataSource
 import es.elchecf.app.domain.model.StandingRow
 import es.elchecf.app.domain.repository.Competition
@@ -53,12 +55,14 @@ private val laLigaStandings: List<StandingRow> =
         }
 
 class MockStandingsDataSource : StandingsDataSource {
-    override suspend fun fetchStandings(competition: Competition): List<StandingRow> {
+    override suspend fun fetchStandings(competition: Competition): AppResult<List<StandingRow>, AppError> {
         delay(NETWORK_DELAY_MS)
-        return when (competition) {
-            Competition.LaLiga -> laLigaStandings
-            Competition.Copa -> emptyList() // FASE 5: la Copa se sigue en el bracket, no en tabla
-        }
+        return AppResult.Success(
+            when (competition) {
+                Competition.LaLiga -> laLigaStandings
+                Competition.Copa -> emptyList() // FASE 5: la Copa se sigue en el bracket, no en tabla
+            },
+        )
     }
 
     private companion object {

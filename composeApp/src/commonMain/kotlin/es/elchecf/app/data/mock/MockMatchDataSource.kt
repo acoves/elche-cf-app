@@ -40,14 +40,14 @@ private val seasonMatches: List<Match> =
     }
 
 class MockMatchDataSource : MatchDataSource {
-    override suspend fun fetchNextMatch(): Match {
+    override suspend fun fetchNextMatch(): AppResult<Match?, AppError> {
         delay(NETWORK_DELAY_MS)
-        return seasonMatches.first()
+        return AppResult.Success(seasonMatches.first())
     }
 
-    override suspend fun fetchSeasonMatches(): List<Match> {
+    override suspend fun fetchSeasonMatches(): AppResult<List<Match>, AppError> {
         delay(NETWORK_DELAY_MS)
-        return seasonMatches
+        return AppResult.Success(seasonMatches)
     }
 
     override suspend fun sendPrediction(prediction: Prediction): AppResult<Unit, AppError> = AppResult.Success(Unit)

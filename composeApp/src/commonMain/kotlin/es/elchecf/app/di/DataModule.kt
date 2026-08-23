@@ -1,5 +1,6 @@
 package es.elchecf.app.di
 
+import es.elchecf.app.core.network.createHttpClient
 import es.elchecf.app.data.AuthDataSource
 import es.elchecf.app.data.CupDataSource
 import es.elchecf.app.data.MatchDataSource
@@ -8,10 +9,10 @@ import es.elchecf.app.data.ProfileDataSource
 import es.elchecf.app.data.StandingsDataSource
 import es.elchecf.app.data.mock.MockAuthDataSource
 import es.elchecf.app.data.mock.MockCupDataSource
-import es.elchecf.app.data.mock.MockMatchDataSource
 import es.elchecf.app.data.mock.MockPlayerDataSource
 import es.elchecf.app.data.mock.MockProfileDataSource
-import es.elchecf.app.data.mock.MockStandingsDataSource
+import es.elchecf.app.data.remote.FootballDataMatchDataSource
+import es.elchecf.app.data.remote.FootballDataStandingsDataSource
 import es.elchecf.app.data.repository.AuthRepositoryImpl
 import es.elchecf.app.data.repository.CupRepositoryImpl
 import es.elchecf.app.data.repository.MatchRepositoryImpl
@@ -26,13 +27,19 @@ import es.elchecf.app.domain.repository.ProfileRepository
 import es.elchecf.app.domain.repository.StandingsRepository
 import org.koin.dsl.module
 
-// FASE 8: cambiar el binding de cada XxxDataSource a la fuente Ktor real — los repositorios no cambian.
+// FASE 8: MatchDataSource y StandingsDataSource ya usan football-data.org real — cambiar de
+// vuelta a mock (p.ej. sin conexión) es solo cambiar estas dos líneas por MockMatchDataSource()/
+// MockStandingsDataSource(), sin tocar los repositorios ni las pantallas (CLAUDE.md §0.7).
+// Player y Cup se quedan en mock: el plan gratis de football-data.org no da dorsales de jugador
+// ni Copa del Rey.
 val dataModule =
     module {
-        single<MatchDataSource> { MockMatchDataSource() }
+        single { createHttpClient() }
+
+        single<MatchDataSource> { FootballDataMatchDataSource(get()) }
         single<MatchRepository> { MatchRepositoryImpl(get()) }
 
-        single<StandingsDataSource> { MockStandingsDataSource() }
+        single<StandingsDataSource> { FootballDataStandingsDataSource(get()) }
         single<StandingsRepository> { StandingsRepositoryImpl(get()) }
 
         single<PlayerDataSource> { MockPlayerDataSource() }

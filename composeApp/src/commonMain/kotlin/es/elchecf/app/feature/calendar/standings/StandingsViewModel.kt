@@ -2,6 +2,7 @@ package es.elchecf.app.feature.calendar.standings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import es.elchecf.app.core.result.AppResult
 import es.elchecf.app.domain.repository.Competition
 import es.elchecf.app.domain.repository.CupRepository
 import es.elchecf.app.domain.repository.StandingsRepository
@@ -35,9 +36,12 @@ class StandingsViewModel(
 
     private fun loadStandings(competition: Competition) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            val standings = standingsRepository.getStandings(competition)
-            _uiState.update { it.copy(isLoading = false, standings = standings) }
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            when (val result = standingsRepository.getStandings(competition)) {
+                is AppResult.Success -> _uiState.update { it.copy(isLoading = false, standings = result.value) }
+                is AppResult.Failure ->
+                    _uiState.update { it.copy(isLoading = false, error = "No se pudo cargar la clasificación.") }
+            }
         }
     }
 }
