@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 7** (2026-08-24).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 8** (2026-08-24), parcial — ver detalle abajo.
 
 ---
 
@@ -282,7 +282,7 @@ Notas de diseño de red (Fase 8):
 | 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | **completada** — verificado en emulador (3 top-tabs + segmentado LaLiga/Copa) |
 | 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | **completada** — verificado en emulador cargando las webs reales del club |
 | 7 | Perfil: cabecera, beneficios, configuración, auth mock | **completada** — verificado en emulador (login/logout mock reactivo) |
-| 8 | Red: Ktor, DTOs, mappers, sustitución de mocks, caché y manejo de errores | pendiente |
+| 8 | Red: Ktor, DTOs, mappers, sustitución de mocks, caché y manejo de errores | **completada parcialmente** — Partido y Clasificación con datos reales de football-data.org, verificado en emulador; Jugadores y Copa siguen en mock (el plan gratuito no los cubre, ver §13) |
 
 **Criterio de "fase terminada":** compila en Android **y** en iOS, sin warnings nuevos, y el usuario ha podido ejecutarlo.
 
@@ -322,6 +322,8 @@ Notas de diseño de red (Fase 8):
 | 2026-08 | Mock-first con interfaces de repositorio definidas desde Fase 4 | Permite maquetar sin depender de contratar API |
 | 2026-08-23 | Proyecto movido fuera de OneDrive (`C:\Users\Usuario\Dev\elche-cf-app`); `git init` + remoto `github.com/acoves/elche-cf-app` | OneDrive causa locks de archivo y caché corrupta intermitentes con Gradle en Windows |
 | 2026-08-23 | Módulo `androidApp` (fino, solo `com.android.application` + entry point) añadido junto a `composeApp` | AGP 9.2.0 prohíbe aplicar `com.android.application`/`com.android.library` en el mismo módulo que `org.jetbrains.kotlin.multiplatform`. `composeApp` pasa a usar el plugin `com.android.kotlin.multiplatform.library` (Android Library, sin `MainActivity`/`Application`, que se mudan a `androidApp`). No es una vuelta al multi-módulo por feature (§2/§3): sigue habiendo un único módulo de código, `androidApp` no tiene lógica propia |
+| 2026-08-24 | football-data.org como proveedor de datos reales (Fase 8) | Único candidato de §6 con plan gratuito confirmado que incluye LaLiga (`PD`) sin tarjeta de crédito; no cubre Copa del Rey ni dorsales de jugadores, así que esas dos áreas se quedan en mock hasta encontrar otra fuente |
+| 2026-08-24 | `Team.ELCHE_ID` cambia de `"elche-cf"` a `"285"` | El valor antiguo era un id inventado para los mocks; con datos reales nunca coincidía con el id que manda la API, así que "CASA/FUERA" en el calendario y el resaltado de la fila del Elche en la clasificación fallaban en silencio. `285` es el id real de Elche CF en football-data.org |
 
 ---
 
@@ -392,3 +394,15 @@ Notas de diseño de red (Fase 8):
 - Fila de sesión reactiva a `AuthRepository.isLoggedIn`: cambia icono/texto y dispara `login()`/`logout()`.
 - **Pendiente:** las 5 filas de Configuración salvo sesión son inertes (`onClick = {}`), no numeradas — cada una necesitará su propia pantalla en una fase futura sin asignar.
 - Verificado en emulador: cerrar sesión oculta beneficios y cambia la cabecera a "Iniciar sesión"; volver a iniciar sesión lo restaura — probado en ambas direcciones.
+
+### Fase 8 — 2026-08-24 (parcial: Partido + Clasificación)
+
+- Proveedor elegido: **football-data.org** (plan gratuito, LaLiga incluida, sin tarjeta — ver §12). API key en `local.properties` (`FOOTBALL_DATA_API_KEY`, nunca versionada) inyectada vía tarea Gradle `generateApiKeys` que escribe `core/network/ApiKeys.kt` en `build/generated/`, añadido como source dir extra de `commonMain`.
+- `core/network/HttpClientFactory.kt`: `HttpClient` único con `ContentNegotiation(json)`, `Logging`, `HttpTimeout(10s)` y cabecera `X-Auth-Token` por defecto.
+- `data/remote/dto/{TeamDto,MatchDto,StandingsDto}.kt` (formas reales del JSON de la API, verificadas con `curl` antes de escribir Kotlin) + `data/mapper/{MatchMapper,StandingsMapper}.kt`.
+- `FootballDataMatchDataSource` (`/teams/285/matches?competitions=PD`) y `FootballDataStandingsDataSource` (`/competitions/PD/standings`, filtra tabla `TOTAL`) sustituyen a los mocks en `DataModule` — el cambio mock↔real sigue siendo esas 2 líneas, tal como exige §0.7.
+- `MatchRepository`/`StandingsRepository` (interfaz, impl, data source, mocks) devuelven ahora `AppResult<T, AppError>` con el nuevo caso `AppError.Network`; `ForYouViewModel`/`MonthlyCalendarViewModel`/`StandingsViewModel` y sus `UiState` propagan el error a la pantalla en vez de fallar en silencio.
+- **Se quedan en mock, a propósito:** `PlayerRepository` (la API no da dorsales) y la Copa del Rey en `StandingsRepository`/`CupRepository` (no está en el plan gratuito) — devuelve lista vacía para `Competition.Copa` en vez de fabricar datos falsos.
+- `sendPrediction()` sigue mock: la API es de solo lectura, no hay backend propio de predicciones (sin proveedor decidido todavía).
+- **Bug encontrado y corregido durante la verificación en emulador:** `Team.ELCHE_ID` valía `"elche-cf"` (id de mock) y nunca coincidía con el id real (`"285"`) que manda la API — CASA/FUERA en el calendario y el resaltado de la fila del Elche en la clasificación no funcionaban con datos reales aunque compilaban sin error. Corregido en `domain/model/Team.kt` (ver §12).
+- Verificado en emulador con datos reales: próximo partido real (Elche–Racing de Santander, 28/08), calendario mensual con CASA/FUERA correctos tras el fix, clasificación real de LaLiga 2026-27 con la fila del Elche resaltada en verde.
