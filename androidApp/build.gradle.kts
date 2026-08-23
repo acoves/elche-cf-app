@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -48,5 +49,14 @@ kotlin {
         implementation(libs.androidx.activity.compose)
         implementation(platform(libs.koin.bom))
         implementation(libs.koin.android)
+    }
+}
+
+ktlint {
+    filter {
+        exclude { element ->
+            val path = element.file.path.replace('\\', '/')
+            path.contains("/generated/")
+        }
     }
 }

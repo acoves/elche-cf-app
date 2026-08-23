@@ -5,6 +5,23 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ktlint)
+}
+
+ktlint {
+    // function-naming (@Composable en PascalCase, factory de UIViewController) se
+    // desactiva vía .editorconfig (ktlint_standard_function-naming = disabled), no aquí.
+
+    // Excluye código generado por el plugin de Compose Resources (Res.kt, ActualResourceCollectors.kt…):
+    // no es código nuestro para formatear. NOTA: el plugin ktlint-gradle + KMP puede necesitar
+    // `./gradlew ktlintCheck --rerun` tras un `clean` para que este filtro se aplique de forma
+    // consistente a todos los source sets (comportamiento observado, no del todo determinista).
+    filter {
+        exclude { element ->
+            val path = element.file.path.replace('\\', '/')
+            path.contains("/generated/")
+        }
+    }
 }
 
 kotlin {
