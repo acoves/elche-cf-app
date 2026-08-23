@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 6** (2026-08-23).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 7** (2026-08-24).
 
 ---
 
@@ -281,7 +281,7 @@ Notas de diseño de red (Fase 8):
 | 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | **completada** — verificado en emulador (ViewModel real, envío de predicción bloquea el formulario) |
 | 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | **completada** — verificado en emulador (3 top-tabs + segmentado LaLiga/Copa) |
 | 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | **completada** — verificado en emulador cargando las webs reales del club |
-| 7 | Perfil: cabecera, beneficios, configuración, auth mock | pendiente |
+| 7 | Perfil: cabecera, beneficios, configuración, auth mock | **completada** — verificado en emulador (login/logout mock reactivo) |
 | 8 | Red: Ktor, DTOs, mappers, sustitución de mocks, caché y manejo de errores | pendiente |
 
 **Criterio de "fase terminada":** compila en Android **y** en iOS, sin warnings nuevos, y el usuario ha podido ejecutarlo.
@@ -384,3 +384,11 @@ Notas de diseño de red (Fase 8):
 - `ShopScreen` con sub-tabs Tienda · Entradas · Membership (`TabRow` clásico, mismo aviso de deprecación que Fase 5).
 - `AndroidManifest.xml`: añadido `INTERNET` (obligatorio para WebView).
 - Verificado en emulador cargando `tienda.elchecf.es` y `entradas.elchecf.es` reales (con su banner de cookies), botón atrás confirmado tras navegar dentro de la web.
+
+### Fase 7 — 2026-08-24
+
+- `UserProfile`, `Benefit`; `ProfileRepository` + `AuthRepository` (sesión en memoria vía `MockAuthDataSource`, `AuthDataSource.isLoggedIn: StateFlow<Boolean>`).
+- `ProfileScreen`: cabecera (avatar con inicial, nombre, chip "Socio · X años"), sección Beneficios (oculta si no hay sesión), sección Configuración con 6 filas (Información personal, Notificaciones, Cookies, Cerrar/Iniciar sesión, Política de privacidad, Condiciones legales).
+- Fila de sesión reactiva a `AuthRepository.isLoggedIn`: cambia icono/texto y dispara `login()`/`logout()`.
+- **Pendiente:** las 5 filas de Configuración salvo sesión son inertes (`onClick = {}`), no numeradas — cada una necesitará su propia pantalla en una fase futura sin asignar.
+- Verificado en emulador: cerrar sesión oculta beneficios y cambia la cabecera a "Iniciar sesión"; volver a iniciar sesión lo restaura — probado en ambas direcciones.
