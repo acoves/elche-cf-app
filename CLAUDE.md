@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 4** (2026-08-23).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 5** (2026-08-23).
 
 ---
 
@@ -279,7 +279,7 @@ Notas de diseño de red (Fase 8):
 | 2 | UI Kit: `ElcheTheme` (colores, tipografías, formas), componentes base (botón, card, franja, section header, top bar) + previews | **completada** — verificado en emulador Android |
 | 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | **completada** — verificado en emulador Android (cambio de tab real) |
 | 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | **completada** — verificado en emulador (ViewModel real, envío de predicción bloquea el formulario) |
-| 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | pendiente |
+| 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | **completada** — verificado en emulador (3 top-tabs + segmentado LaLiga/Copa) |
 | 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | pendiente |
 | 7 | Perfil: cabecera, beneficios, configuración, auth mock | pendiente |
 | 8 | Red: Ktor, DTOs, mappers, sustitución de mocks, caché y manejo de errores | pendiente |
@@ -365,3 +365,14 @@ Notas de diseño de red (Fase 8):
 - `ForYouViewModel` + `ForYouUiState` + `ForYouRoute`/`ForYouScreen` (state hoisting), `viewModelModule` en Koin.
 - Nota técnica: `kotlinx.datetime.Instant`/`Clock` fueron eliminados (ahora son `kotlin.time.Instant`/`kotlin.time.Clock`) — usar siempre `kotlin.time`, no `kotlinx.datetime`, para esos dos tipos.
 - **Pendiente de decidir con el usuario:** fase de Clips sigue sin numerar (arrastrado desde Fase 3).
+
+### Fase 5 — 2026-08-23
+
+- Dominio/datos: `StandingRow`, `Player`/`PlayerPosition`, `CupTie`/`CupRound`; `StandingsRepository`, `PlayerRepository`, `CupRepository` con mocks (`DemoTeams`: 20 clubes de ejemplo, `Team.ELCHE_ID` para identificar "nuestro" equipo en `Match.home/away`). `MatchRepository.getSeasonMatches()` para el calendario.
+- `CalendarScreen`: top-tabs Calendario · Clasificaciones · Jugadores (`TabRow` clásico — deprecado en favor de `SecondaryTabRow`, pendiente de migrar; de momento indicador por defecto en verde vía `primary`).
+- `MonthlyCalendarScreen`: grid mensual real (kotlinx-datetime), navegación de mes, etiqueta CASA (azul)/FUERA (rojo) por partido.
+- `StandingsScreen`: segmented LaLiga/Copa, tabla J V E D DG PTS con Elche resaltado + barra lateral de zona (Europa/descenso, reutiliza `CrestBlue`/`CrestRed`).
+- `CupBracketView`: bracket octavos→final con alineación geométrica entre rondas (cada cruce centrado sobre sus dos predecesores); **líneas conectoras dibujadas quedan pendientes** (polish visual, no bloquea la lectura).
+- `PlayersScreen`: grid 2 columnas agrupado por posición, dorsal grande + nombre en dos líneas.
+- **Pendiente:** selector de equipo (Primer equipo/Femenino/Ilicitano) en bottom sheet — solo hay datos del primer equipo.
+- Verificado en emulador: las 3 top-tabs, el segmentado LaLiga/Copa y la navegación de mes funcionan de verdad.
