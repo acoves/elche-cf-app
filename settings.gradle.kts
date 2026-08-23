@@ -28,4 +28,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ElcheApp"
 
-// FASE 1 (chunk 2): se añade include(":composeApp") en cuanto exista composeApp/build.gradle.kts
+include(":composeApp")
+include(":androidApp")

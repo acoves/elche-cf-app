@@ -64,7 +64,7 @@ Verificar antes de usar. Fuente: kotlinlang.org (compatibilidad KMP/CMP), blog d
 ### Decisiones cerradas sobre el stack
 
 - **Navegación: `navigation-compose` de JetBrains, no Voyager.** El prompt inicial mencionaba Voyager/Decompose; Voyager ha perdido tracción y esta app tiene una jerarquía simple (5 tabs + detalles). Navigation multiplataforma con rutas `@Serializable` es lo estándar en 2026 y lo que mejor documentación tiene. *Alternativa si la navegación anidada se complica: Decompose 3.x. Navigation 3 existe pero su integración con Koin sigue en alpha — no lo usamos todavía.*
-- **Un solo módulo `composeApp` con paquetes por capa/feature.** Multi-módulo Gradle es correcto para equipos grandes, pero aquí multiplica el tiempo de build y la fricción sin beneficio real. Si el proyecto crece, se extraen módulos por feature (ver §12).
+- **Un solo módulo de código compartido `composeApp` con paquetes por capa/feature.** Multi-módulo Gradle por feature es correcto para equipos grandes, pero aquí multiplica el tiempo de build y la fricción sin beneficio real. Si el proyecto crece, se extraen módulos por feature (ver §12). *Actualizado en Fase 1 (ver §12, entrada AGP 9): existe un segundo módulo `androidApp`, fino y sin lógica propia, exigido por AGP 9 — no es una modularización por feature, sigue siendo "un solo módulo de código" a efectos de esta decisión.*
 - **WebView por librería, no `expect/actual` a mano.** `compose-webview-multiplatform` envuelve `WebView` (Android) y `WKWebView` (iOS) con una API Compose. Se aísla detrás de nuestro propio `AppWebView` composable para poder cambiar de librería sin tocar las pantallas.
 
 ---
@@ -100,8 +100,13 @@ elche-app/
 ├─ settings.gradle.kts
 ├─ build.gradle.kts
 ├─ iosApp/                          # proyecto Xcode (entry point iOS)
-└─ composeApp/
-   ├─ build.gradle.kts
+├─ androidApp/                      # FASE 1: módulo fino exigido por AGP 9 (ver §12). Solo entry point Android.
+│  ├─ build.gradle.kts              #   plugin com.android.application, sin lógica propia
+│  └─ src/main/
+│     ├─ AndroidManifest.xml        #   declara Application + Activity
+│     └─ kotlin/es/elchecf/app/     #   MainActivity, ElcheApplication (invoca initKoin)
+└─ composeApp/                      # módulo de código compartido (KMP), sigue siendo "el módulo único" a efectos de §2
+   ├─ build.gradle.kts              # plugin com.android.kotlin.multiplatform.library (no com.android.application)
    └─ src/
       ├─ commonMain/
       │  ├─ kotlin/es/elchecf/app/
@@ -132,7 +137,7 @@ elche-app/
       │  │     ├─ shop/
       │  │     └─ profile/
       │  └─ composeResources/       # drawable/, font/, values/strings.xml (multi-idioma)
-      ├─ androidMain/               # MainActivity, Application, actuals
+      ├─ androidMain/               # actuals específicos de Android (ya NO MainActivity/Application, viven en androidApp/)
       └─ iosMain/                   # MainViewController, actuals
 ```
 
@@ -315,6 +320,8 @@ Notas de diseño de red (Fase 8):
 | 2026-08 | Módulo único `composeApp` | Velocidad de build y simplicidad; se modulariza solo si crece |
 | 2026-08 | Verde `#05642C` como primario (no `#006022`) | Tomado del escudo oficial; se mantiene coherencia con los assets del club |
 | 2026-08 | Mock-first con interfaces de repositorio definidas desde Fase 4 | Permite maquetar sin depender de contratar API |
+| 2026-08-23 | Proyecto movido fuera de OneDrive (`C:\Users\Usuario\Dev\elche-cf-app`); `git init` + remoto `github.com/acoves/elche-cf-app` | OneDrive causa locks de archivo y caché corrupta intermitentes con Gradle en Windows |
+| 2026-08-23 | Módulo `androidApp` (fino, solo `com.android.application` + entry point) añadido junto a `composeApp` | AGP 9.2.0 prohíbe aplicar `com.android.application`/`com.android.library` en el mismo módulo que `org.jetbrains.kotlin.multiplatform`. `composeApp` pasa a usar el plugin `com.android.kotlin.multiplatform.library` (Android Library, sin `MainActivity`/`Application`, que se mudan a `androidApp`). No es una vuelta al multi-módulo por feature (§2/§3): sigue habiendo un único módulo de código, `androidApp` no tiene lógica propia |
 
 ---
 
