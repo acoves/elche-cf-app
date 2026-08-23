@@ -77,6 +77,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.webview.multiplatform)
         }
         androidMain.dependencies {
             // FASE 1: sin dependencias Android-only propias todavía (koin-android vive en androidApp)

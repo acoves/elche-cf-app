@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- FASE 6: necesario para AppWebView (tienda/entradas/membership) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".ElcheApplication"
         android:allowBackup="true"

@@ -12,6 +12,7 @@ lifecycleViewmodelCompose = "2.9.5"
 coilCompose = "3.5.0"
 androidxActivityCompose = "1.13.0"
 ktlintGradle = "14.2.0"
+webviewMultiplatform = "2.0.3"
 
 [libraries]
 # Koin — usado desde el chunk 3
@@ -44,6 +45,9 @@ coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.r
 
 # Solo Android
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivityCompose" }
+
+# Fase 6 (Tienda): AppWebView envuelve esta librería, nunca se usa directamente en las pantallas
+webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webviewMultiplatform" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
