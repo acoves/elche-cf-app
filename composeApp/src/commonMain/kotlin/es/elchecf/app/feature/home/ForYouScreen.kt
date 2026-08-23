@@ -6,32 +6,42 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import es.elchecf.app.designsystem.component.SectionHeader
 import es.elchecf.app.designsystem.component.VersusCard
 import es.elchecf.app.designsystem.theme.ElcheSpacing
-import es.elchecf.app.domain.model.Match
+import es.elchecf.app.designsystem.theme.ElcheTheme
 import es.elchecf.app.domain.model.MatchStatus
-import es.elchecf.app.domain.model.Team
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-
-// FASE 4 (en construcción): VersusCard + predictor ya reales. Quiz, valorar partido, y el
-// ForYouViewModel que sustituye este partido de ejemplo, llegan en el siguiente chunk.
-private val sampleMatch =
-    Match(
-        id = "demo-match-1",
-        home = Team("elche-cf", "Elche CF", "ELCHE", "", "#05642C"),
-        away = Team("rival-demo", "Real Madrid", "R. MADRID", "", "#1B458F"),
-        kickoffInstant = Clock.System.now() + 3.days,
-        competition = "LaLiga",
-        venue = "Martínez Valero",
-        status = MatchStatus.Scheduled,
-    )
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ForYouScreen(modifier: Modifier = Modifier) {
+fun ForYouRoute(modifier: Modifier = Modifier) {
+    val viewModel = koinViewModel<ForYouViewModel>()
+    val uiState by viewModel.uiState.collectAsState()
+
+    ForYouScreen(
+        uiState = uiState,
+        onSubmitPrediction = viewModel::submitPrediction,
+        onFichaDelPartidoClick = {}, // FASE 5: navegar a la ficha del partido cuando exista esa pantalla
+        onPlayQuizClick = {}, // FASE del quiz sin numerar todavía en CLAUDE.md §8
+        onValorarClick = {}, // FASE del quiz sin numerar todavía en CLAUDE.md §8
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun ForYouScreen(
+    uiState: ForYouUiState,
+    onSubmitPrediction: (homeGoals: Int, awayGoals: Int) -> Unit,
+    onFichaDelPartidoClick: () -> Unit,
+    onPlayQuizClick: () -> Unit,
+    onValorarClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier =
             modifier
@@ -40,17 +50,36 @@ fun ForYouScreen(modifier: Modifier = Modifier) {
                 .padding(ElcheSpacing.screenMargin),
     ) {
         SectionHeader(title = "Para ti")
-        VersusCard(
-            match = sampleMatch,
-            onFichaDelPartidoClick = {},
-            modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
-        )
-        PredictorCard(
-            home = sampleMatch.home,
-            away = sampleMatch.away,
-            locked = sampleMatch.status != MatchStatus.Scheduled,
-            onSubmit = { _, _ -> },
-            modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
-        )
+
+        val match = uiState.match
+        when {
+            uiState.isLoading -> Text(text = "Cargando…", style = ElcheTheme.typography.bodyS)
+            match == null -> Text(text = "No hay próximo partido programado.", style = ElcheTheme.typography.bodyS)
+            else -> {
+                VersusCard(
+                    match = match,
+                    onFichaDelPartidoClick = onFichaDelPartidoClick,
+                    modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                )
+                PredictorCard(
+                    home = match.home,
+                    away = match.away,
+                    locked = uiState.predictionSent || match.status != MatchStatus.Scheduled,
+                    onSubmit = onSubmitPrediction,
+                    modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                )
+                QuizCard(
+                    score = uiState.quizScore,
+                    onPlayClick = onPlayQuizClick,
+                    modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                )
+                if (uiState.showValorateMatch) {
+                    ValorateMatchCard(
+                        onValorarClick = onValorarClick,
+                        modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                    )
+                }
+            }
+        }
     }
 }

@@ -17,6 +17,6 @@ val appModule: Module = module {}
 fun initKoin(config: KoinAppDeclaration = {}) {
     startKoin {
         config()
-        modules(appModule, dataModule)
+        modules(appModule, dataModule, viewModelModule)
     }
 }
