@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import es.elchecf.app.feature.calendar.CalendarScreen
 import es.elchecf.app.feature.clips.ClipsScreen
 import es.elchecf.app.feature.home.ForYouRoute
-import es.elchecf.app.feature.profile.ProfileScreen
+import es.elchecf.app.feature.profile.ProfileRoute
 import es.elchecf.app.feature.shop.ShopScreen
 
 @Composable
@@ -21,6 +21,6 @@ fun RootNavHost(
         composable<Route.Calendar> { CalendarScreen() }
         composable<Route.Clips> { ClipsScreen() }
         composable<Route.Shop> { ShopScreen() }
-        composable<Route.Profile> { ProfileScreen() }
+        composable<Route.Profile> { ProfileRoute() }
     }
 }
