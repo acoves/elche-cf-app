@@ -12,6 +12,11 @@ pluginManagement {
     }
 }
 
+plugins {
+    // Descarga automática de un JDK 17 si el toolchain no está instalado localmente.
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {

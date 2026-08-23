@@ -8,7 +8,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "es.elchecf.app"
         compileSdk = 37
         minSdk = 26
@@ -34,6 +34,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            // Alias compose.* (accessor del plugin org.jetbrains.compose): deprecado desde CMP 1.10
+            // a favor de coordenadas Maven directas, pero las coordenadas directas
+            // (org.jetbrains.compose.material3:material3, etc.) no se resuelven en Maven Central
+            // con la versión 1.11.1 — pendiente de revisar cuando JetBrains publique la ruta de
+            // migración real. El accessor sigue funcionando, solo emite warning.
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -47,7 +52,7 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
         }
         androidMain.dependencies {
-            implementation(libs.koin.android)
+            // FASE 1: sin dependencias Android-only propias todavía (koin-android vive en androidApp)
         }
         iosMain.dependencies {
             // FASE 1 (iOS): sin dependencias adicionales todavía; Ktor Darwin llega en Fase 8
