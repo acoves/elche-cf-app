@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 5** (2026-08-23).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 6** (2026-08-23).
 
 ---
 
@@ -280,7 +280,7 @@ Notas de diseño de red (Fase 8):
 | 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | **completada** — verificado en emulador Android (cambio de tab real) |
 | 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | **completada** — verificado en emulador (ViewModel real, envío de predicción bloquea el formulario) |
 | 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | **completada** — verificado en emulador (3 top-tabs + segmentado LaLiga/Copa) |
-| 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | pendiente |
+| 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | **completada** — verificado en emulador cargando las webs reales del club |
 | 7 | Perfil: cabecera, beneficios, configuración, auth mock | pendiente |
 | 8 | Red: Ktor, DTOs, mappers, sustitución de mocks, caché y manejo de errores | pendiente |
 
@@ -376,3 +376,11 @@ Notas de diseño de red (Fase 8):
 - `PlayersScreen`: grid 2 columnas agrupado por posición, dorsal grande + nombre en dos líneas.
 - **Pendiente:** selector de equipo (Primer equipo/Femenino/Ilicitano) en bottom sheet — solo hay datos del primer equipo.
 - Verificado en emulador: las 3 top-tabs, el segmentado LaLiga/Copa y la navegación de mes funcionan de verdad.
+
+### Fase 6 — 2026-08-23
+
+- `core/webview/AppWebView.kt`: envuelve `compose-webview-multiplatform` 2.0.3 — topbar propio con atrás (navega dentro del WebView si hay historial), franja de carga (progreso real, no indeterminada), error con reintentar.
+- `core/webview/ExternalLinkOpener.kt` (expect/actual): `mailto:`/`tel:` se detectan tras el intento de carga fallido y se abren fuera de la app. **Limitación documentada:** la librería no expone `shouldOverrideUrlLoading`, así que pasarelas de pago externas (siempre http/https) no se pueden distinguir de una navegación normal y se cargan dentro del WebView.
+- `ShopScreen` con sub-tabs Tienda · Entradas · Membership (`TabRow` clásico, mismo aviso de deprecación que Fase 5).
+- `AndroidManifest.xml`: añadido `INTERNET` (obligatorio para WebView).
+- Verificado en emulador cargando `tienda.elchecf.es` y `entradas.elchecf.es` reales (con su banner de cookies), botón atrás confirmado tras navegar dentro de la web.
