@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 2** (2026-08-23).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 3** (2026-08-23).
 
 ---
 
@@ -277,7 +277,7 @@ Notas de diseño de red (Fase 8):
 |------|-----------|--------|
 | 1 | Setup: `settings.gradle.kts`, `libs.versions.toml`, `build.gradle.kts`, targets, estructura de carpetas, `initKoin`, app corriendo en Android e iOS con una pantalla vacía | **completada** — Android verificado (emulador, screenshot); iOS escrito y sin verificar (sin Mac, ver §12) |
 | 2 | UI Kit: `ElcheTheme` (colores, tipografías, formas), componentes base (botón, card, franja, section header, top bar) + previews | **completada** — verificado en emulador Android |
-| 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | pendiente |
+| 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | **completada** — verificado en emulador Android (cambio de tab real) |
 | 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | pendiente |
 | 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | pendiente |
 | 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | pendiente |
@@ -344,3 +344,13 @@ Notas de diseño de red (Fase 8):
 - Fuentes OFL descargadas de google/fonts: Barlow Condensed SemiBold/Bold (titulares) e Inter variable con pesos 400/500/600 vía `FontVariation` (soportado en iOS/desktop desde CMP 1.8, confirmado antes de usarlo).
 - `designsystem/component`: `ElcheButton` (variantes Primary/Accent), `ElcheCard`, `Franja`, `SectionHeader`, `ElcheTopBar`, cada uno con `@Preview`.
 - Verificado en emulador Android con una galería temporal en `App()` (se sustituye en Fase 3).
+
+### Fase 3 — 2026-08-23
+
+- `navigation/Route.kt` (5 rutas `@Serializable`), `RootNavHost.kt`, `BottomBar.kt` (indicador verde de marca).
+- `App()` ahora es `Scaffold` real: `ElcheBottomBar` + `RootNavHost`, sustituye la galería de la Fase 2.
+- Esqueletos de las 5 pantallas (`feature/home|calendar|clips|shop|profile`), cada uno con `SectionHeader` + nota de qué fase lo completa. **Pendiente aclarar con el usuario:** Clips no tiene fase numerada asignada en la tabla de §8.
+- `designsystem/icon/ElcheIcon.kt` con Material Icons Extended (nota: pinned a 1.7.3 por JetBrains, migrar a Material Symbols cuando haga falta — ver warning de build).
+- Añadidas dependencias `navigation-compose` + `kotlinx-serialization-json` y plugin de serialización al catálogo.
+- `gradle.properties` nuevo: más heap para Gradle (D8 se quedaba sin memoria dexeando `material-icons-extended`) y `kotlin.native.ignoreDisabledTargets` para silenciar el aviso de tests iOS en Windows.
+- Verificado en emulador Android: las 5 tabs cambian de pantalla y el indicador activo se resalta en verde.
