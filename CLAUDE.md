@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **ninguna (pre-Fase 1)**.
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 1** (2026-08-23).
 
 ---
 
@@ -275,7 +275,7 @@ Notas de diseño de red (Fase 8):
 
 | Fase | Contenido | Estado |
 |------|-----------|--------|
-| 1 | Setup: `settings.gradle.kts`, `libs.versions.toml`, `build.gradle.kts`, targets, estructura de carpetas, `initKoin`, app corriendo en Android e iOS con una pantalla vacía | **pendiente** |
+| 1 | Setup: `settings.gradle.kts`, `libs.versions.toml`, `build.gradle.kts`, targets, estructura de carpetas, `initKoin`, app corriendo en Android e iOS con una pantalla vacía | **completada** — Android verificado (emulador, screenshot); iOS escrito y sin verificar (sin Mac, ver §12) |
 | 2 | UI Kit: `ElcheTheme` (colores, tipografías, formas), componentes base (botón, card, franja, section header, top bar) + previews | pendiente |
 | 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | pendiente |
 | 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | pendiente |
@@ -327,4 +327,13 @@ Notas de diseño de red (Fase 8):
 
 ## 13. Changelog
 
-- *(vacío — se rellena al cerrar cada fase)*
+### Fase 1 — 2026-08-23
+
+- Proyecto movido fuera de OneDrive; `git init` + remoto GitHub.
+- Setup Gradle: `settings.gradle.kts`, `gradle/libs.versions.toml` (versiones verificadas en Maven Central, no de memoria), `build.gradle.kts` raíz, wrapper Gradle 9.7.1.
+- Módulos `composeApp` (KMP, `com.android.kotlin.multiplatform.library`) + `androidApp` (thin, `com.android.application`) — split forzado por AGP 9 (ver §12).
+- `App.kt` (pantalla vacía con `safeDrawingPadding`) + `InitKoin.kt` en `composeApp/commonMain`.
+- `MainActivity`/`ElcheApplication`/`AndroidManifest.xml` en `androidApp`.
+- Verificado en emulador Android (Pixel 10 Pro XL): instala, arranca, muestra "Elche CF".
+- Entry point iOS (`MainViewController.kt`, `iOSApp.swift`, `ContentView.swift`, `Info.plist`) escrito, sin verificar — no hay Mac disponible.
+- ktlint (`org.jlleitschuh.gradle.ktlint`) + `.editorconfig`, `ktlintCheck` en verde.
