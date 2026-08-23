@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import es.elchecf.app.designsystem.component.SectionHeader
@@ -15,9 +17,8 @@ import es.elchecf.app.domain.model.Team
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
-// FASE 4 (en construcción): VersusCard ya con cuenta atrás real. Predictor, quiz y valorar
-// partido, y el ForYouViewModel que sustituye este partido de ejemplo, llegan en el siguiente
-// chunk de esta misma fase.
+// FASE 4 (en construcción): VersusCard + predictor ya reales. Quiz, valorar partido, y el
+// ForYouViewModel que sustituye este partido de ejemplo, llegan en el siguiente chunk.
 private val sampleMatch =
     Match(
         id = "demo-match-1",
@@ -31,11 +32,24 @@ private val sampleMatch =
 
 @Composable
 fun ForYouScreen(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxSize().padding(ElcheSpacing.screenMargin)) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(ElcheSpacing.screenMargin),
+    ) {
         SectionHeader(title = "Para ti")
         VersusCard(
             match = sampleMatch,
             onFichaDelPartidoClick = {},
+            modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+        )
+        PredictorCard(
+            home = sampleMatch.home,
+            away = sampleMatch.away,
+            locked = sampleMatch.status != MatchStatus.Scheduled,
+            onSubmit = { _, _ -> },
             modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
         )
     }
