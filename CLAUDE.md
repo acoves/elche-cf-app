@@ -1,7 +1,7 @@
 # CLAUDE.md — App Elche CF (Kotlin Multiplatform + Compose Multiplatform)
 
 > Documento maestro del proyecto. Léelo entero al inicio de **cada** sesión antes de escribir código.
-> Fecha de redacción: agosto 2026. Última fase completada: **Fase 3** (2026-08-23).
+> Fecha de redacción: agosto 2026. Última fase completada: **Fase 4** (2026-08-23).
 
 ---
 
@@ -278,7 +278,7 @@ Notas de diseño de red (Fase 8):
 | 1 | Setup: `settings.gradle.kts`, `libs.versions.toml`, `build.gradle.kts`, targets, estructura de carpetas, `initKoin`, app corriendo en Android e iOS con una pantalla vacía | **completada** — Android verificado (emulador, screenshot); iOS escrito y sin verificar (sin Mac, ver §12) |
 | 2 | UI Kit: `ElcheTheme` (colores, tipografías, formas), componentes base (botón, card, franja, section header, top bar) + previews | **completada** — verificado en emulador Android |
 | 3 | Navegación: bottom bar de 5 tabs, `NavHost`, rutas serializables, esqueletos de las 5 pantallas | **completada** — verificado en emulador Android (cambio de tab real) |
-| 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | pendiente |
+| 4 | Para ti: `VersusCard` + cuenta atrás real, predictor interactivo, tarjetas de quiz y valoración, `MatchRepository` con mocks | **completada** — verificado en emulador (ViewModel real, envío de predicción bloquea el formulario) |
 | 5 | Calendario: top-tabs, vista mensual, tabla de clasificación, bracket de Copa, grid de jugadores | pendiente |
 | 6 | Tienda: `AppWebView` cross-platform + sub-tabs + estados de carga/error | pendiente |
 | 7 | Perfil: cabecera, beneficios, configuración, auth mock | pendiente |
@@ -354,3 +354,14 @@ Notas de diseño de red (Fase 8):
 - Añadidas dependencias `navigation-compose` + `kotlinx-serialization-json` y plugin de serialización al catálogo.
 - `gradle.properties` nuevo: más heap para Gradle (D8 se quedaba sin memoria dexeando `material-icons-extended`) y `kotlin.native.ignoreDisabledTargets` para silenciar el aviso de tests iOS en Windows.
 - Verificado en emulador Android: las 5 tabs cambian de pantalla y el indicador activo se resalta en verde.
+
+### Fase 4 — 2026-08-23
+
+- `core/result` (`AppResult`/`AppError`), `core/util` (`CountdownParts`/`countdownFlow`, `toColorOrNull`, `toKickoffLabel` con `kotlinx-datetime`).
+- Dominio: `Team`, `Match`/`Score`/`MatchStatus`, `Prediction`, `MatchRepository`.
+- Datos: `MatchDataSource` + `MockMatchDataSource` (datos de ejemplo, no oficiales — CLAUDE.md §10) + `MatchRepositoryImpl`, `dataModule` en Koin.
+- `VersusCard` (`designsystem/component`): fondo dividido por colores de equipo, cuenta atrás real (tick de 1s verificado), CTA dorado, pie blanco.
+- `PredictorCard`, `QuizCard`, `ValorateMatchCard` en `feature/home`.
+- `ForYouViewModel` + `ForYouUiState` + `ForYouRoute`/`ForYouScreen` (state hoisting), `viewModelModule` en Koin.
+- Nota técnica: `kotlinx.datetime.Instant`/`Clock` fueron eliminados (ahora son `kotlin.time.Instant`/`kotlin.time.Clock`) — usar siempre `kotlin.time`, no `kotlinx.datetime`, para esos dos tipos.
+- **Pendiente de decidir con el usuario:** fase de Clips sigue sin numerar (arrastrado desde Fase 3).
