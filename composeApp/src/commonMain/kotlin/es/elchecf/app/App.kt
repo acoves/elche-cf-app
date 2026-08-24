@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
@@ -38,6 +39,22 @@ fun App() {
         var currentRoute by remember { mutableStateOf<Route>(Route.ForYou) }
         var requestedShopTab by remember { mutableStateOf<ShopTab?>(null) }
 
+        // Patrón estándar de bottom nav (sin esto, cada cambio de pestaña creaba una entrada
+        // nueva en el back stack → ViewModel nuevo → "Cargando" otra vez y la pantalla
+        // anterior/nueva se veían mezcladas un instante). popUpTo+saveState / restoreState
+        // reutiliza la instancia de cada pestaña y restaura su estado ya cargado en vez de
+        // arrancar de cero.
+        fun navigateToTab(route: Route) {
+            currentRoute = route
+            navController.navigate(route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+
         // Solo Tienda se precarga (ver ShopWebViewPrefetch.kt): probar lo mismo con las 3 pestañas
         // de Tienda a la vez notó impacto de rendimiento en el arranque, así que Entradas/Membership
         // se quedan con su carga normal, al seleccionarlas el usuario.
@@ -48,10 +65,7 @@ fun App() {
             bottomBar = {
                 ElcheBottomBar(
                     currentRoute = currentRoute,
-                    onSelect = { route ->
-                        currentRoute = route
-                        navController.navigate(route) { launchSingleTop = true }
-                    },
+                    onSelect = { route -> navigateToTab(route) },
                 )
             },
         ) { innerPadding ->
@@ -61,8 +75,7 @@ fun App() {
                 onShopTabConsumed = { requestedShopTab = null },
                 onNavigateToMembership = {
                     requestedShopTab = ShopTab.Membership
-                    currentRoute = Route.Shop
-                    navController.navigate(Route.Shop) { launchSingleTop = true }
+                    navigateToTab(Route.Shop)
                 },
                 modifier = Modifier.padding(innerPadding),
             )
