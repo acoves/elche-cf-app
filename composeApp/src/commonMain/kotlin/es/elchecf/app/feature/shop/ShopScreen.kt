@@ -15,16 +15,21 @@ import androidx.compose.ui.Modifier
 import es.elchecf.app.core.webview.AppWebView
 import es.elchecf.app.designsystem.theme.ElcheTheme
 
+/** URL de Tienda, también usada por [es.elchecf.app.prefetchShopWebView] para precargarla al
+ * arrancar la app (ver App.kt) — vive aquí porque es este archivo el dueño de las URLs de Tienda. */
+const val TIENDA_URL = "https://tienda.elchecf.es"
+
 private enum class ShopTab(
     val label: String,
     val title: String,
-    val url: String,
+    val url: String?,
 ) {
-    Tienda("Tienda", "Tienda", "https://tienda.elchecf.es"),
+    Tienda("Tienda", "Tienda", TIENDA_URL),
     Entradas("Entradas", "Entradas", "https://entradas.elchecf.es"),
 
-    // FASE 6: URL exacta de la sección de abonados pendiente de confirmar con el club.
-    Membership("Membership", "Membership", "https://www.elchecf.es"),
+    // FASE 6: sin URL a propósito — contenido de Membership pendiente de decidir, no hay nada que
+    // cargar todavía (antes apuntaba a la home del club, que no era la sección real de abonados).
+    Membership("Membership", "Membership", null),
 }
 
 @Composable
@@ -44,10 +49,9 @@ fun ShopScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
-        AppWebView(
-            url = selectedTab.url,
-            title = selectedTab.title,
-            modifier = Modifier.weight(1f),
-        )
+        val url = selectedTab.url
+        if (url != null) {
+            AppWebView(url = url, title = selectedTab.title, modifier = Modifier.weight(1f))
+        }
     }
 }

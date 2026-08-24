@@ -87,6 +87,7 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
+            implementation(libs.androidx.webkit)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
