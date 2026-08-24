@@ -324,6 +324,8 @@ Notas de diseño de red (Fase 8):
 | 2026-08-23 | Módulo `androidApp` (fino, solo `com.android.application` + entry point) añadido junto a `composeApp` | AGP 9.2.0 prohíbe aplicar `com.android.application`/`com.android.library` en el mismo módulo que `org.jetbrains.kotlin.multiplatform`. `composeApp` pasa a usar el plugin `com.android.kotlin.multiplatform.library` (Android Library, sin `MainActivity`/`Application`, que se mudan a `androidApp`). No es una vuelta al multi-módulo por feature (§2/§3): sigue habiendo un único módulo de código, `androidApp` no tiene lógica propia |
 | 2026-08-24 | football-data.org como proveedor de datos reales (Fase 8) | Único candidato de §6 con plan gratuito confirmado que incluye LaLiga (`PD`) sin tarjeta de crédito; no cubre Copa del Rey ni dorsales de jugadores, así que esas dos áreas se quedan en mock hasta encontrar otra fuente |
 | 2026-08-24 | `Team.ELCHE_ID` cambia de `"elche-cf"` a `"285"` | El valor antiguo era un id inventado para los mocks; con datos reales nunca coincidía con el id que manda la API, así que "CASA/FUERA" en el calendario y el resaltado de la fila del Elche en la clasificación fallaban en silencio. `285` es el id real de Elche CF en football-data.org |
+| 2026-08-24 | Fotos de Beneficios en Perfil desde Wikimedia Commons, URL directa de `upload.wikimedia.org` (no `Special:FilePath`) | Única fuente de imágenes con licencia libre verificable a mano; `Special:FilePath` devuelve 429 (rate limit) al pedir varias miniaturas a la vez porque pasa por el servidor de la wiki antes de redirigir — la URL final del CDN no tiene ese problema |
+| 2026-08-24 | Tienda puede arrancar en una sub-pestaña concreta (`ShopScreen(initialTab, onInitialTabConsumed)`) en vez de siempre en Tienda | El pop-up de un beneficio en Perfil necesita poder abrir directamente en Membership; se hoisted un `ShopTab?` a `App.kt` en vez de meter routing anidado solo para este caso |
 
 ---
 
@@ -406,3 +408,19 @@ Notas de diseño de red (Fase 8):
 - `sendPrediction()` sigue mock: la API es de solo lectura, no hay backend propio de predicciones (sin proveedor decidido todavía).
 - **Bug encontrado y corregido durante la verificación en emulador:** `Team.ELCHE_ID` valía `"elche-cf"` (id de mock) y nunca coincidía con el id real (`"285"`) que manda la API — CASA/FUERA en el calendario y el resaltado de la fila del Elche en la clasificación no funcionaban con datos reales aunque compilaban sin error. Corregido en `domain/model/Team.kt` (ver §12).
 - Verificado en emulador con datos reales: próximo partido real (Elche–Racing de Santander, 28/08), calendario mensual con CASA/FUERA correctos tras el fix, clasificación real de LaLiga 2026-27 con la fila del Elche resaltada en verde.
+
+### Mejoras post-Fase 8 — 2026-08-24 (Tienda: carga y precarga)
+
+- `AppWebView` muestra un overlay de carga de marca (spinner verde + "Cargando…") mientras el motor del WebView pinta su primer frame, en vez de dejar ver el blanco del propio motor.
+- `prefetchShopWebView()` (expect/actual, `core/webview/ShopWebViewPrefetch.kt`): en Android usa `Profile.prefetchUrlAsync` de `androidx.webkit` (feature-gated con `WebViewFeature.isFeatureSupported`) para precargar la URL de Tienda a la caché real del motor del WebView desde el arranque de la app, sin montar ningún WebView ni bloquear el arranque. Sin equivalente en iOS todavía (no-op, ver comentario `// FASE 6 (iOS)`).
+- Se probó primero precargar las 3 pestañas de Tienda manteniéndolas siempre montadas (ocultas con tamaño 0dp): rompía el renderizado de verdad (pantalla en blanco permanente pese a que el árbol de layout era correcto) y el arranque en frío pasaba de ~6s a +10s — revertido. `prefetchUrlAsync` es la alternativa segura: no mantiene vistas nativas vivas, solo caché de red.
+- Solo se precarga Tienda; Entradas sigue su carga normal al seleccionarla (precargar varias a la vez sí se notó en el arranque).
+- Membership se queda sin URL (antes cargaba la home del club, que no era su sección real) — contenido pendiente de decidir.
+
+### Mejora post-Fase 7 — 2026-08-24 (Perfil: beneficios reales, imágenes, pop-up)
+
+- `ProfileScreen` reorganizado siguiendo el formato de referencia: cabecera, "Beneficios" con acción "Ver todo" (decorativa, sin pantalla propia todavía), "Configuración" y "Legal" como secciones separadas, "Cerrar sesión"/"Eliminar la cuenta" (stub)/versión de la app al pie.
+- Los 6 beneficios pasan a ser los reales del Carnet Franjiverde (abonados.elchecf.es, verificados agosto 2026 vía búsqueda web — la propia web de abonados es una SPA sin contenido accesible por fetch simple), cada uno con foto real cargada por red: Coil 3 (`coil-compose` + `coil-network-ktor3`, `SingletonImageLoaderFactory` en `App.kt`) contra imágenes de Wikimedia Commons con licencia libre (CLAUDE.md §10).
+- `Benefit` gana el campo `detail`: el texto largo del pop-up, distinto del `subtitle` corto de la fila.
+- Tocar "···" en una fila abre un `ModalBottomSheet` (título, detalle, botón dorado "Consigue el Carnet Franjiverde") que navega a Tienda → Membership. `ShopScreen` acepta ahora `initialTab`/`onInitialTabConsumed` para poder abrir directamente en una sub-pestaña concreta cuando se llega desde fuera (ver §12).
+- Verificado en emulador: header y beneficios con contenido e imágenes reales, pop-up con el formato exacto de la referencia, botón del pop-up navega de verdad a Tienda con Membership ya seleccionada.
