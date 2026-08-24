@@ -7,6 +7,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +20,9 @@ import es.elchecf.app.designsystem.theme.ElcheTheme
  * arrancar la app (ver App.kt) — vive aquí porque es este archivo el dueño de las URLs de Tienda. */
 const val TIENDA_URL = "https://tienda.elchecf.es"
 
-private enum class ShopTab(
+/** No `private`: [es.elchecf.app.App] necesita nombrar [Membership] para poder abrir Tienda
+ * directamente en esa sub-pestaña desde el botón del pop-up de un beneficio en Perfil. */
+enum class ShopTab(
     val label: String,
     val title: String,
     val url: String?,
@@ -33,8 +36,21 @@ private enum class ShopTab(
 }
 
 @Composable
-fun ShopScreen(modifier: Modifier = Modifier) {
-    var selectedTab by remember { mutableStateOf(ShopTab.Tienda) }
+fun ShopScreen(
+    initialTab: ShopTab? = null,
+    onInitialTabConsumed: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    var selectedTab by remember { mutableStateOf(initialTab ?: ShopTab.Tienda) }
+
+    // Consume la pestaña solicitada desde fuera (p. ej. Perfil → beneficio → Membership) una sola
+    // vez: si el usuario vuelve a Tienda por su cuenta después, se ve la primera pestaña de siempre.
+    LaunchedEffect(initialTab) {
+        if (initialTab != null) {
+            selectedTab = initialTab
+            onInitialTabConsumed()
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         TabRow(

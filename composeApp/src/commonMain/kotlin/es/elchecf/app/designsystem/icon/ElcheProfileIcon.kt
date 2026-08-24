@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Cookie
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.MoreVert
@@ -22,4 +23,5 @@ object ElcheProfileIcon {
     val Legal: ImageVector = Icons.Filled.Gavel
     val ChevronRight: ImageVector = Icons.Filled.ChevronRight
     val More: ImageVector = Icons.Filled.MoreVert
+    val Close: ImageVector = Icons.Filled.Close
 }
