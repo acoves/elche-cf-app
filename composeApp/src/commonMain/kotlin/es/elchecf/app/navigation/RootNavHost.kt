@@ -1,7 +1,8 @@
 package es.elchecf.app.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -13,6 +14,12 @@ import es.elchecf.app.feature.home.ForYouRoute
 import es.elchecf.app.feature.profile.ProfileRoute
 import es.elchecf.app.feature.shop.ShopScreen
 import es.elchecf.app.feature.shop.ShopTab
+
+/** Duración del fundido entre pestañas: rápido a propósito, para disimular el cambio de
+ * contenido sin que se note como una animación "de verdad" (CLAUDE.md §4.3 pide 200–250ms para
+ * movimiento normal, pero aquí es más corto porque es solo para tapar el corte, no una transición
+ * protagonista). */
+private const val TAB_FADE_MS = 120
 
 @Composable
 fun RootNavHost(
@@ -26,12 +33,10 @@ fun RootNavHost(
         navController = navController,
         startDestination = Route.ForYou,
         modifier = modifier,
-        // Las 5 pestañas del bottom bar son un cambio de sitio, no una navegación con jerarquía:
-        // sin transición, cambio directo (el usuario lo pidió explícitamente).
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None },
-        popEnterTransition = { EnterTransition.None },
-        popExitTransition = { ExitTransition.None },
+        enterTransition = { fadeIn(tween(TAB_FADE_MS)) },
+        exitTransition = { fadeOut(tween(TAB_FADE_MS)) },
+        popEnterTransition = { fadeIn(tween(TAB_FADE_MS)) },
+        popExitTransition = { fadeOut(tween(TAB_FADE_MS)) },
     ) {
         composable<Route.ForYou> { ForYouRoute() }
         composable<Route.Calendar> { CalendarScreen() }
