@@ -326,6 +326,8 @@ Notas de diseño de red (Fase 8):
 | 2026-08-24 | `Team.ELCHE_ID` cambia de `"elche-cf"` a `"285"` | El valor antiguo era un id inventado para los mocks; con datos reales nunca coincidía con el id que manda la API, así que "CASA/FUERA" en el calendario y el resaltado de la fila del Elche en la clasificación fallaban en silencio. `285` es el id real de Elche CF en football-data.org |
 | 2026-08-24 | Fotos de Beneficios en Perfil desde Wikimedia Commons, URL directa de `upload.wikimedia.org` (no `Special:FilePath`) | Única fuente de imágenes con licencia libre verificable a mano; `Special:FilePath` devuelve 429 (rate limit) al pedir varias miniaturas a la vez porque pasa por el servidor de la wiki antes de redirigir — la URL final del CDN no tiene ese problema |
 | 2026-08-24 | Tienda puede arrancar en una sub-pestaña concreta (`ShopScreen(initialTab, onInitialTabConsumed)`) en vez de siempre en Tienda | El pop-up de un beneficio en Perfil necesita poder abrir directamente en Membership; se hoisted un `ShopTab?` a `App.kt` en vez de meter routing anidado solo para este caso |
+| 2026-08-25 | `navigate()` del bottom bar usa `popUpTo(start){saveState=true}` + `restoreState=true` | Sin esto cada cambio de pestaña creaba una entrada nueva en el back stack → ViewModel nuevo → "Cargando" otra vez y pantallas mezcladas un instante al no haber transición. Patrón estándar de bottom nav, reutiliza la instancia y el estado ya cargado de cada pestaña |
+| 2026-08-25 | `ClubTeam` (Primer equipo/Femenino/Ilicitano): Femenino e Ilicitano en mock, no football-data.org | Verificado con la API (`GET /v4/competitions`, 13 competiciones en el plan): no hay Liga F ni categorías regionales españolas. `FootballDataMatchDataSource`/`FootballDataStandingsDataSource` delegan en el mock correspondiente para esos dos equipos en vez de fallar o devolver vacío |
 
 ---
 
@@ -378,7 +380,7 @@ Notas de diseño de red (Fase 8):
 - `StandingsScreen`: segmented LaLiga/Copa, tabla J V E D DG PTS con Elche resaltado + barra lateral de zona (Europa/descenso, reutiliza `CrestBlue`/`CrestRed`).
 - `CupBracketView`: bracket octavos→final con alineación geométrica entre rondas (cada cruce centrado sobre sus dos predecesores); **líneas conectoras dibujadas quedan pendientes** (polish visual, no bloquea la lectura).
 - `PlayersScreen`: grid 2 columnas agrupado por posición, dorsal grande + nombre en dos líneas.
-- **Pendiente:** selector de equipo (Primer equipo/Femenino/Ilicitano) en bottom sheet — solo hay datos del primer equipo.
+- Selector de equipo (Primer equipo/Femenino/Ilicitano) en bottom sheet: implementado en la mejora post-Fase 5 del 2026-08-25 (ver más abajo) — Jugadores sigue sin separar por equipo, no pedido todavía.
 - Verificado en emulador: las 3 top-tabs, el segmentado LaLiga/Copa y la navegación de mes funcionan de verdad.
 
 ### Fase 6 — 2026-08-23
@@ -424,3 +426,10 @@ Notas de diseño de red (Fase 8):
 - `Benefit` gana el campo `detail`: el texto largo del pop-up, distinto del `subtitle` corto de la fila.
 - Tocar "···" en una fila abre un `ModalBottomSheet` (título, detalle, botón dorado "Consigue el Carnet Franjiverde") que navega a Tienda → Membership. `ShopScreen` acepta ahora `initialTab`/`onInitialTabConsumed` para poder abrir directamente en una sub-pestaña concreta cuando se llega desde fuera (ver §12).
 - Verificado en emulador: header y beneficios con contenido e imágenes reales, pop-up con el formato exacto de la referencia, botón del pop-up navega de verdad a Tienda con Membership ya seleccionada.
+
+### Mejoras post-Fase 3/5 — 2026-08-25 (navegación, calendario, selector de equipo)
+
+- **Fix de fondo en la navegación del bottom bar:** `navigate()` no usaba `popUpTo`/`restoreState`, así que cada cambio de pestaña creaba una entrada nueva en el back stack en vez de reutilizar la existente — cada pantalla volvía a arrancar de cero (ViewModel nuevo, "Cargando" otra vez) y, al quitar la transición por defecto, la pantalla anterior y la nueva (vacía) se veían mezcladas un instante. Corregido con el patrón estándar de bottom nav (`popUpTo(start){saveState=true}` + `launchSingleTop` + `restoreState=true`, ver §12). De paso se afinó la transición entre pestañas a un fundido rápido (120ms) en vez del fundido/tamaño por defecto de la librería.
+- **Calendario:** en los días de partido, el número del día se sustituye por el escudo real del rival (Coil, viene de football-data.org) — se omite a propósito, el escudo ya identifica el día. Celdas cuadradas (`aspectRatio(1f)`, el calendario ocupa más alto a propósito) para que el escudo tenga sitio. Sin escudo en la API: inicial del equipo sobre círculo en vez de dejarlo vacío.
+- **Selector de equipo (Primer equipo/Femenino/Ilicitano):** bottom sheet encima de Calendario/Clasificaciones/Jugadores (CLAUDE.md §5.2, pendiente desde Fase 5). `ClubTeam` nuevo en `domain/model`; `MatchRepository.getSeasonMatches(team)` y `StandingsRepository.getStandings(competition, team)` ganan el parámetro. Verificado con la API real de football-data.org (`GET /v4/competitions`) que el plan gratuito no cubre Liga F ni las categorías regionales españolas — Femenino e Ilicitano se sirven con datos de ejemplo (`MockMatchDataSource`/`MockStandingsDataSource`, nombres de clubes reales de esas competiciones pero calendario/clasificación inventados, ver §12) en vez de fallar o dejarlos vacíos. Jugadores se queda con el primer equipo, no pedido todavía.
+- Verificado en emulador: cambio de pestaña sin mezcla visible ni "Cargando" al volver; calendario con escudos reales del rival; los 3 equipos del selector cargan su calendario y clasificación propios, con el Elche siempre resaltado en la tabla.
