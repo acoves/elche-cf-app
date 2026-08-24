@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import es.elchecf.app.designsystem.icon.ElcheCalendarIcon
 import es.elchecf.app.designsystem.theme.ElcheColor
 import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.domain.model.Match
 import es.elchecf.app.domain.model.Team
 import kotlinx.datetime.TimeZone
@@ -52,9 +54,10 @@ private val monthNames =
     )
 
 @Composable
-fun MonthlyCalendarRoute() {
+fun MonthlyCalendarRoute(selectedTeam: ClubTeam) {
     val viewModel = koinViewModel<MonthlyCalendarViewModel>()
     val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(selectedTeam) { viewModel.selectTeam(selectedTeam) }
     MonthlyCalendarScreen(
         uiState = uiState,
         onPreviousMonth = viewModel::goToPreviousMonth,

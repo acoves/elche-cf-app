@@ -3,6 +3,7 @@ package es.elchecf.app.data.repository
 import es.elchecf.app.core.result.AppError
 import es.elchecf.app.core.result.AppResult
 import es.elchecf.app.data.MatchDataSource
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.domain.model.Match
 import es.elchecf.app.domain.model.Prediction
 import es.elchecf.app.domain.repository.MatchRepository
@@ -14,7 +15,8 @@ class MatchRepositoryImpl(
 ) : MatchRepository {
     override suspend fun getNextMatch(): AppResult<Match?, AppError> = dataSource.fetchNextMatch()
 
-    override suspend fun getSeasonMatches(): AppResult<List<Match>, AppError> = dataSource.fetchSeasonMatches()
+    override suspend fun getSeasonMatches(team: ClubTeam): AppResult<List<Match>, AppError> =
+        dataSource.fetchSeasonMatches(team)
 
     override suspend fun submitPrediction(prediction: Prediction): AppResult<Unit, AppError> =
         dataSource.sendPrediction(prediction)

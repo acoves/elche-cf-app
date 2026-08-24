@@ -13,6 +13,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,15 +24,17 @@ import androidx.compose.ui.unit.dp
 import es.elchecf.app.designsystem.theme.ElcheColor
 import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.domain.model.StandingRow
 import es.elchecf.app.domain.model.Team
 import es.elchecf.app.domain.repository.Competition
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun StandingsRoute() {
+fun StandingsRoute(selectedTeam: ClubTeam) {
     val viewModel = koinViewModel<StandingsViewModel>()
     val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(selectedTeam) { viewModel.selectTeam(selectedTeam) }
     StandingsScreen(uiState = uiState, onSelectCompetition = viewModel::selectCompetition)
 }
 

@@ -2,6 +2,7 @@ package es.elchecf.app.data
 
 import es.elchecf.app.core.result.AppError
 import es.elchecf.app.core.result.AppResult
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.domain.model.Match
 import es.elchecf.app.domain.model.Prediction
 
@@ -12,7 +13,7 @@ import es.elchecf.app.domain.model.Prediction
 interface MatchDataSource {
     suspend fun fetchNextMatch(): AppResult<Match?, AppError>
 
-    suspend fun fetchSeasonMatches(): AppResult<List<Match>, AppError>
+    suspend fun fetchSeasonMatches(team: ClubTeam): AppResult<List<Match>, AppError>
 
     suspend fun sendPrediction(prediction: Prediction): AppResult<Unit, AppError>
 }
