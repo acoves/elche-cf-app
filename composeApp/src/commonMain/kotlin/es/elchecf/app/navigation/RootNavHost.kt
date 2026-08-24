@@ -1,5 +1,7 @@
 package es.elchecf.app.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -20,7 +22,17 @@ fun RootNavHost(
     onNavigateToMembership: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    NavHost(navController = navController, startDestination = Route.ForYou, modifier = modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Route.ForYou,
+        modifier = modifier,
+        // Las 5 pestañas del bottom bar son un cambio de sitio, no una navegación con jerarquía:
+        // sin transición, cambio directo (el usuario lo pidió explícitamente).
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None },
+    ) {
         composable<Route.ForYou> { ForYouRoute() }
         composable<Route.Calendar> { CalendarScreen() }
         composable<Route.Clips> { ClipsScreen() }

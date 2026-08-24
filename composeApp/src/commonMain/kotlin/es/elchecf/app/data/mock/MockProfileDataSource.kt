@@ -3,7 +3,6 @@ package es.elchecf.app.data.mock
 import es.elchecf.app.data.ProfileDataSource
 import es.elchecf.app.domain.model.Benefit
 import es.elchecf.app.domain.model.UserProfile
-import kotlinx.coroutines.delay
 
 // FASE 7: perfil de ejemplo, no datos reales de ningún socio.
 private val profile =
@@ -89,18 +88,10 @@ private val benefits =
         ),
     )
 
+// Mejora post-Fase 7: sin delay artificial — el usuario quiere que Perfil aparezca de golpe,
+// no con las secciones apareciendo tarde (antes 300ms x2, secuenciales, por fetch).
 class MockProfileDataSource : ProfileDataSource {
-    override suspend fun fetchProfile(): UserProfile {
-        delay(NETWORK_DELAY_MS)
-        return profile
-    }
+    override suspend fun fetchProfile(): UserProfile = profile
 
-    override suspend fun fetchBenefits(): List<Benefit> {
-        delay(NETWORK_DELAY_MS)
-        return benefits
-    }
-
-    private companion object {
-        const val NETWORK_DELAY_MS = 300L
-    }
+    override suspend fun fetchBenefits(): List<Benefit> = benefits
 }
