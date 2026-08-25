@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import es.elchecf.app.designsystem.component.ElcheButton
+import es.elchecf.app.designsystem.component.ElcheSheetHeader
 import es.elchecf.app.designsystem.icon.ElcheProfileIcon
 import es.elchecf.app.designsystem.theme.ElcheColor
 import es.elchecf.app.designsystem.theme.ElcheSpacing
@@ -50,7 +51,7 @@ fun PersonalInfoSheet(
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ElcheSpacing.lg, vertical = ElcheSpacing.md)) {
-            SheetHeader(title = "Información personal", onClose = onDismiss)
+            ElcheSheetHeader(title = "Información personal", onClose = onDismiss)
             OutlinedTextField(
                 value = firstName,
                 onValueChange = { firstName = it },
@@ -90,7 +91,7 @@ fun MemberLoginSheet(
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ElcheSpacing.lg, vertical = ElcheSpacing.md)) {
-            SheetHeader(title = "¿Eres socio?", onClose = onDismiss)
+            ElcheSheetHeader(title = "¿Eres socio?", onClose = onDismiss)
             OutlinedTextField(
                 value = clave,
                 onValueChange = { clave = it },
@@ -145,7 +146,7 @@ fun CookiesSheet(onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ElcheSpacing.lg, vertical = ElcheSpacing.md)) {
-            SheetHeader(title = "Configuración de cookies", onClose = onDismiss)
+            ElcheSheetHeader(title = "Configuración de cookies", onClose = onDismiss)
             Text(
                 text =
                     "Usamos cookies propias y de terceros para que la app funcione y para medir " +
@@ -205,22 +206,5 @@ private fun CookieToggleRow(
             enabled = enabled,
             colors = SwitchDefaults.colors(checkedTrackColor = ElcheColor.Green),
         )
-    }
-}
-
-@Composable
-private fun SheetHeader(
-    title: String,
-    onClose: () -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = title.uppercase(), style = ElcheTheme.typography.titleM, modifier = Modifier.weight(1f))
-        IconButton(onClick = onClose) {
-            Icon(imageVector = ElcheProfileIcon.Close, contentDescription = "Cerrar")
-        }
     }
 }

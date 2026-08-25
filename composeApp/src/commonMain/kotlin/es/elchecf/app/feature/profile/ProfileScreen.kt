@@ -39,6 +39,7 @@ import coil3.compose.AsyncImage
 import es.elchecf.app.designsystem.component.ElcheButton
 import es.elchecf.app.designsystem.component.ElcheButtonVariant
 import es.elchecf.app.designsystem.component.ElcheCard
+import es.elchecf.app.designsystem.component.ElcheSheetHeader
 import es.elchecf.app.designsystem.component.SectionHeader
 import es.elchecf.app.designsystem.icon.ElcheProfileIcon
 import es.elchecf.app.designsystem.theme.ElcheColor
@@ -404,20 +405,7 @@ private fun BenefitDetailSheet(
     val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().padding(ElcheSpacing.lg)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = benefit.title.uppercase(),
-                    style = ElcheTheme.typography.titleM,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(onClick = onDismiss) {
-                    Icon(imageVector = ElcheProfileIcon.Close, contentDescription = "Cerrar")
-                }
-            }
+            ElcheSheetHeader(title = benefit.title, onClose = onDismiss)
             Text(
                 text = benefit.detail,
                 style = ElcheTheme.typography.body,

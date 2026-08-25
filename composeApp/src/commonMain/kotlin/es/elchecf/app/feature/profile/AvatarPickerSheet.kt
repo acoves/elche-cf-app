@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,9 +19,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,11 +33,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import es.elchecf.app.designsystem.component.ElcheButton
+import es.elchecf.app.designsystem.component.ElcheSheetHeader
 import es.elchecf.app.designsystem.icon.ElcheProfileIcon
 import es.elchecf.app.designsystem.theme.ElcheColor
 import es.elchecf.app.designsystem.theme.ElcheShape
 import es.elchecf.app.designsystem.theme.ElcheSpacing
-import es.elchecf.app.designsystem.theme.ElcheTheme
 
 /**
  * Opciones de avatar (CLAUDE.md §10: nada de fotografía oficial del club sin permiso). Escudo real
@@ -80,16 +77,11 @@ fun AvatarPickerSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = ElcheSpacing.lg)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.md),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = "Elige un avatar", style = ElcheTheme.typography.titleM, modifier = Modifier.weight(1f))
-                IconButton(onClick = onDismiss) {
-                    Icon(imageVector = ElcheProfileIcon.Close, contentDescription = "Cerrar")
-                }
-            }
+            ElcheSheetHeader(
+                title = "Elige un avatar",
+                onClose = onDismiss,
+                modifier = Modifier.padding(top = ElcheSpacing.md),
+            )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 horizontalArrangement = Arrangement.spacedBy(ElcheSpacing.sm),
