@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -21,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import es.elchecf.app.designsystem.component.ElcheSegmentedTabRow
 import es.elchecf.app.designsystem.icon.ElcheCalendarIcon
 import es.elchecf.app.designsystem.theme.ElcheColor
 import es.elchecf.app.designsystem.theme.ElcheSpacing
@@ -50,22 +48,19 @@ fun CalendarScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(top = ElcheSpacing.sm, start = ElcheSpacing.lg, end = ElcheSpacing.lg),
         )
 
-        // FASE 5: indicador de tab activo con el franja de 6dp (CLAUDE.md §4.4) queda pendiente —
-        // la API de indicador personalizado de TabRow cambió entre versiones de Material3 y no se
-        // resolvió a tiempo; de momento usa el indicador por defecto (ya en verde, vía `primary`).
-        TabRow(
-            selectedTabIndex = selectedTab.ordinal,
-            containerColor = MaterialTheme.colorScheme.background,
-            modifier = Modifier.padding(top = ElcheSpacing.sm),
-        ) {
-            CalendarTab.entries.forEach { tab ->
-                Tab(
-                    selected = tab == selectedTab,
-                    onClick = { selectedTab = tab },
-                    text = { Text(text = tab.label, style = ElcheTheme.typography.label) },
-                )
-            }
-        }
+        ElcheSegmentedTabRow(
+            tabs = CalendarTab.entries,
+            selected = selectedTab,
+            onSelect = { selectedTab = it },
+            label = { it.label },
+            modifier =
+                Modifier.padding(
+                    top = ElcheSpacing.sm,
+                    start = ElcheSpacing.lg,
+                    end = ElcheSpacing.lg,
+                    bottom = ElcheSpacing.xs,
+                ),
+        )
         when (selectedTab) {
             CalendarTab.Calendario -> MonthlyCalendarRoute(selectedTeam = selectedTeam)
             CalendarTab.Clasificaciones -> StandingsRoute(selectedTeam = selectedTeam)
