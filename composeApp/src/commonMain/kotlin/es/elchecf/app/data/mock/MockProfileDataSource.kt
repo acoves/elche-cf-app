@@ -3,12 +3,16 @@ package es.elchecf.app.data.mock
 import es.elchecf.app.data.ProfileDataSource
 import es.elchecf.app.domain.model.Benefit
 import es.elchecf.app.domain.model.UserProfile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 // FASE 7: perfil de ejemplo, no datos reales de ningún socio.
-private val profile =
+private val initialProfile =
     UserProfile(
         id = "demo-user-1",
-        fullName = "Antonio Franjiverde",
+        firstName = "Antonio",
+        lastName = "Franjiverde",
         avatarUrl = "",
         memberStatusLabel = "Socio · 2 años",
     )
@@ -90,8 +94,23 @@ private val benefits =
 
 // Mejora post-Fase 7: sin delay artificial — el usuario quiere que Perfil aparezca de golpe,
 // no con las secciones apareciendo tarde (antes 300ms x2, secuenciales, por fetch).
+// Mejora post-Fase 7 (2): el perfil pasa a ser mutable en memoria (StateFlow) para que editar el
+// nombre o el avatar en Perfil se refleje al momento, igual que el patrón ya usado en
+// MockAuthDataSource para la sesión.
 class MockProfileDataSource : ProfileDataSource {
-    override suspend fun fetchProfile(): UserProfile = profile
+    private val _profile = MutableStateFlow(initialProfile)
+    override val profile: StateFlow<UserProfile> = _profile
 
     override suspend fun fetchBenefits(): List<Benefit> = benefits
+
+    override fun updateProfile(
+        firstName: String,
+        lastName: String,
+    ) {
+        _profile.update { it.copy(firstName = firstName, lastName = lastName) }
+    }
+
+    override fun updateAvatar(avatarUrl: String) {
+        _profile.update { it.copy(avatarUrl = avatarUrl) }
+    }
 }

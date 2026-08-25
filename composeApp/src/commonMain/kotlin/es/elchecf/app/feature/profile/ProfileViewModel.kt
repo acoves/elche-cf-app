@@ -20,9 +20,13 @@ class ProfileViewModel(
 
     init {
         viewModelScope.launch {
-            val profile = profileRepository.getProfile()
             val benefits = profileRepository.getBenefits()
-            _uiState.update { it.copy(isLoading = false, profile = profile, benefits = benefits) }
+            _uiState.update { it.copy(isLoading = false, benefits = benefits) }
+        }
+        viewModelScope.launch {
+            profileRepository.profile.collectLatest { profile ->
+                _uiState.update { it.copy(profile = profile) }
+            }
         }
         viewModelScope.launch {
             authRepository.isLoggedIn.collectLatest { loggedIn ->
@@ -38,4 +42,11 @@ class ProfileViewModel(
     fun logout() {
         viewModelScope.launch { authRepository.logout() }
     }
+
+    fun updateProfile(
+        firstName: String,
+        lastName: String,
+    ) = profileRepository.updateProfile(firstName, lastName)
+
+    fun updateAvatar(avatarUrl: String) = profileRepository.updateAvatar(avatarUrl)
 }

@@ -47,7 +47,32 @@ import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
 import es.elchecf.app.domain.model.Benefit
 import es.elchecf.app.domain.model.UserProfile
+import es.elchecf.app.feature.profile.legal.LegalScreen
+import es.elchecf.app.feature.profile.legal.LegalTermsContent
+import es.elchecf.app.feature.profile.legal.PrivacyPolicyContent
 import org.koin.compose.viewmodel.koinViewModel
+
+private sealed interface ProfileSubScreen {
+    data object Main : ProfileSubScreen
+
+    data object Notifications : ProfileSubScreen
+
+    data object NotificationsDirecto : ProfileSubScreen
+
+    data object PrivacyPolicy : ProfileSubScreen
+
+    data object LegalTerms : ProfileSubScreen
+}
+
+private sealed interface ProfileSheet {
+    data object PersonalInfo : ProfileSheet
+
+    data object MemberLogin : ProfileSheet
+
+    data object AvatarPicker : ProfileSheet
+
+    data object Cookies : ProfileSheet
+}
 
 @Composable
 fun ProfileRoute(onNavigateToMembership: () -> Unit) {
@@ -58,6 +83,8 @@ fun ProfileRoute(onNavigateToMembership: () -> Unit) {
         onLogin = viewModel::login,
         onLogout = viewModel::logout,
         onNavigateToMembership = onNavigateToMembership,
+        onUpdateProfile = viewModel::updateProfile,
+        onUpdateAvatar = viewModel::updateAvatar,
     )
 }
 
@@ -67,9 +94,97 @@ fun ProfileScreen(
     onLogin: () -> Unit = {},
     onLogout: () -> Unit = {},
     onNavigateToMembership: () -> Unit = {},
+    onUpdateProfile: (firstName: String, lastName: String) -> Unit = { _, _ -> },
+    onUpdateAvatar: (String) -> Unit = {},
 ) {
+    var subScreen by remember { mutableStateOf<ProfileSubScreen>(ProfileSubScreen.Main) }
+    var sheet by remember { mutableStateOf<ProfileSheet?>(null) }
     var selectedBenefit by remember { mutableStateOf<Benefit?>(null) }
 
+    when (subScreen) {
+        ProfileSubScreen.Main ->
+            ProfileMainScreen(
+                uiState = uiState,
+                onAvatarClick = { sheet = ProfileSheet.AvatarPicker },
+                onPersonalInfoClick = { sheet = ProfileSheet.PersonalInfo },
+                onNotificationsClick = { subScreen = ProfileSubScreen.Notifications },
+                onCookiesClick = { sheet = ProfileSheet.Cookies },
+                onLoginClick = { sheet = ProfileSheet.MemberLogin },
+                onLogout = onLogout,
+                onPrivacyClick = { subScreen = ProfileSubScreen.PrivacyPolicy },
+                onLegalClick = { subScreen = ProfileSubScreen.LegalTerms },
+                onBenefitMoreClick = { selectedBenefit = it },
+            )
+        ProfileSubScreen.Notifications ->
+            NotificationsScreen(
+                onBack = { subScreen = ProfileSubScreen.Main },
+                onOpenDirecto = { subScreen = ProfileSubScreen.NotificationsDirecto },
+            )
+        ProfileSubScreen.NotificationsDirecto ->
+            NotificationsDirectoScreen(onBack = { subScreen = ProfileSubScreen.Notifications })
+        ProfileSubScreen.PrivacyPolicy ->
+            LegalScreen(page = PrivacyPolicyContent, onBack = { subScreen = ProfileSubScreen.Main })
+        ProfileSubScreen.LegalTerms ->
+            LegalScreen(page = LegalTermsContent, onBack = { subScreen = ProfileSubScreen.Main })
+    }
+
+    when (sheet) {
+        ProfileSheet.PersonalInfo ->
+            PersonalInfoSheet(
+                profile = uiState.profile,
+                onDismiss = { sheet = null },
+                onSave = { firstName, lastName ->
+                    onUpdateProfile(firstName, lastName)
+                    sheet = null
+                },
+            )
+        ProfileSheet.MemberLogin ->
+            MemberLoginSheet(
+                onDismiss = { sheet = null },
+                onContinue = {
+                    onLogin()
+                    sheet = null
+                },
+            )
+        ProfileSheet.AvatarPicker ->
+            AvatarPickerSheet(
+                currentAvatarUrl = uiState.profile?.avatarUrl.orEmpty(),
+                onDismiss = { sheet = null },
+                onSave = {
+                    onUpdateAvatar(it)
+                    sheet = null
+                },
+            )
+        ProfileSheet.Cookies -> CookiesSheet(onDismiss = { sheet = null })
+        null -> Unit
+    }
+
+    val benefit = selectedBenefit
+    if (benefit != null) {
+        BenefitDetailSheet(
+            benefit = benefit,
+            onDismiss = { selectedBenefit = null },
+            onCta = {
+                selectedBenefit = null
+                onNavigateToMembership()
+            },
+        )
+    }
+}
+
+@Composable
+private fun ProfileMainScreen(
+    uiState: ProfileUiState,
+    onAvatarClick: () -> Unit,
+    onPersonalInfoClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
+    onCookiesClick: () -> Unit,
+    onLoginClick: () -> Unit,
+    onLogout: () -> Unit,
+    onPrivacyClick: () -> Unit,
+    onLegalClick: () -> Unit,
+    onBenefitMoreClick: (Benefit) -> Unit,
+) {
     Column(
         modifier =
             Modifier
@@ -77,7 +192,12 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(ElcheSpacing.screenMargin),
     ) {
-        ProfileHeader(profile = uiState.profile, isLoggedIn = uiState.isLoggedIn, onLogin = onLogin)
+        ProfileHeader(
+            profile = uiState.profile,
+            isLoggedIn = uiState.isLoggedIn,
+            onLogin = onLoginClick,
+            onAvatarClick = onAvatarClick,
+        )
 
         if (uiState.isLoggedIn && uiState.benefits.isNotEmpty()) {
             SectionHeader(
@@ -92,25 +212,33 @@ fun ProfileScreen(
                 verticalArrangement = Arrangement.spacedBy(ElcheSpacing.sm),
             ) {
                 uiState.benefits.forEach { benefit ->
-                    BenefitRow(benefit = benefit, onMoreClick = { selectedBenefit = benefit })
+                    BenefitRow(benefit = benefit, onMoreClick = { onBenefitMoreClick(benefit) })
                 }
             }
         }
 
         SectionHeader(title = "Configuración", modifier = Modifier.padding(top = ElcheSpacing.xl))
         Column(modifier = Modifier.padding(top = ElcheSpacing.md)) {
-            ConfigRow(icon = ElcheProfileIcon.PersonalInfo, label = "Información personal")
-            ConfigRow(icon = ElcheProfileIcon.Notifications, label = "Notificaciones")
-            ConfigRow(icon = ElcheProfileIcon.Cookies, label = "Cookies")
+            ConfigRow(
+                icon = ElcheProfileIcon.PersonalInfo,
+                label = "Información personal",
+                onClick = onPersonalInfoClick,
+            )
+            ConfigRow(icon = ElcheProfileIcon.Notifications, label = "Notificaciones", onClick = onNotificationsClick)
+            ConfigRow(icon = ElcheProfileIcon.Cookies, label = "Cookies", onClick = onCookiesClick)
             if (!uiState.isLoggedIn) {
-                ConfigRow(icon = ElcheProfileIcon.Login, label = "¿Eres socio? Inicia sesión aquí", onClick = onLogin)
+                ConfigRow(
+                    icon = ElcheProfileIcon.Login,
+                    label = "¿Eres socio? Inicia sesión aquí",
+                    onClick = onLoginClick,
+                )
             }
         }
 
         SectionHeader(title = "Legal", modifier = Modifier.padding(top = ElcheSpacing.xl))
         Column(modifier = Modifier.padding(top = ElcheSpacing.md)) {
-            ConfigRow(icon = ElcheProfileIcon.Privacy, label = "Política de privacidad")
-            ConfigRow(icon = ElcheProfileIcon.Legal, label = "Condiciones legales")
+            ConfigRow(icon = ElcheProfileIcon.Privacy, label = "Política de privacidad", onClick = onPrivacyClick)
+            ConfigRow(icon = ElcheProfileIcon.Legal, label = "Condiciones legales", onClick = onLegalClick)
         }
 
         if (uiState.isLoggedIn) {
@@ -144,18 +272,6 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.xl, bottom = ElcheSpacing.lg),
         )
     }
-
-    val benefit = selectedBenefit
-    if (benefit != null) {
-        BenefitDetailSheet(
-            benefit = benefit,
-            onDismiss = { selectedBenefit = null },
-            onCta = {
-                selectedBenefit = null
-                onNavigateToMembership()
-            },
-        )
-    }
 }
 
 @Composable
@@ -163,42 +279,86 @@ private fun ProfileHeader(
     profile: UserProfile?,
     isLoggedIn: Boolean,
     onLogin: () -> Unit,
+    onAvatarClick: () -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Box(
-            modifier = Modifier.size(64.dp).background(ElcheColor.Green, CircleShape),
+            modifier =
+                Modifier
+                    .size(88.dp)
+                    .clip(CircleShape)
+                    .background(ElcheColor.Green)
+                    .clickable(onClick = onAvatarClick),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = profile?.fullName?.take(1) ?: "?",
-                style = ElcheTheme.typography.titleL,
-                color = ElcheColor.White,
-            )
-        }
-        Column(modifier = Modifier.padding(start = ElcheSpacing.md)) {
-            if (isLoggedIn && profile != null) {
-                Text(text = profile.fullName, style = ElcheTheme.typography.titleM)
-                Box(
-                    modifier =
-                        Modifier
-                            .padding(top = ElcheSpacing.xs)
-                            .background(ElcheColor.GreenSoft, ElcheShape.Pill)
-                            .padding(horizontal = ElcheSpacing.sm, vertical = ElcheSpacing.xs),
-                ) {
-                    Text(
-                        text = profile.memberStatusLabel,
-                        style = ElcheTheme.typography.label,
-                        color = ElcheColor.Green,
-                    )
-                }
+            val avatarUrl = profile?.avatarUrl
+            if (!avatarUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(88.dp).clip(CircleShape),
+                )
             } else {
-                Text(text = "No has iniciado sesión", style = ElcheTheme.typography.titleM)
-                ElcheButton(
-                    text = "Iniciar sesión",
-                    onClick = onLogin,
-                    modifier = Modifier.padding(top = ElcheSpacing.sm),
+                Text(
+                    text = profile?.fullName?.take(1) ?: "?",
+                    style = ElcheTheme.typography.displayM,
+                    color = ElcheColor.White,
                 )
             }
+            Box(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(ElcheColor.Gold),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = ElcheProfileIcon.Camera,
+                    contentDescription = "Cambiar avatar",
+                    tint = ElcheColor.GoldDeep,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+        }
+
+        if (isLoggedIn && profile != null) {
+            Text(
+                text = profile.fullName.uppercase(),
+                style = ElcheTheme.typography.titleL,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = ElcheSpacing.md),
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .padding(top = ElcheSpacing.xs)
+                        .background(ElcheColor.GreenSoft, ElcheShape.Pill)
+                        .padding(horizontal = ElcheSpacing.sm, vertical = ElcheSpacing.xs),
+            ) {
+                Text(
+                    text = profile.memberStatusLabel,
+                    style = ElcheTheme.typography.label,
+                    color = ElcheColor.Green,
+                )
+            }
+        } else {
+            Text(
+                text = "NO HAS INICIADO SESIÓN",
+                style = ElcheTheme.typography.titleL,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = ElcheSpacing.md),
+            )
+            ElcheButton(
+                text = "Iniciar sesión",
+                onClick = onLogin,
+                modifier = Modifier.padding(top = ElcheSpacing.sm),
+            )
         }
     }
 }
@@ -307,7 +467,7 @@ private fun ProfileScreenPreview() {
                 ProfileUiState(
                     isLoading = false,
                     isLoggedIn = true,
-                    profile = UserProfile("1", "Antonio Franjiverde", "", "Socio · 2 años"),
+                    profile = UserProfile("1", "Antonio", "Franjiverde", "", "Socio · 2 años"),
                     benefits =
                         listOf(
                             Benefit(
