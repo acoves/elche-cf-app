@@ -330,6 +330,7 @@ Notas de diseño de red (Fase 8):
 | 2026-08-25 | `ClubTeam` (Primer equipo/Femenino/Ilicitano): Femenino e Ilicitano en mock, no football-data.org | Verificado con la API (`GET /v4/competitions`, 13 competiciones en el plan): no hay Liga F ni categorías regionales españolas. `FootballDataMatchDataSource`/`FootballDataStandingsDataSource` delegan en el mock correspondiente para esos dos equipos en vez de fallar o devolver vacío |
 | 2026-08-25 | Política de privacidad y Condiciones legales: pantalla nativa con contenido real de elchecf.es, no WebView | El usuario lo pidió explícitamente — contenido extraído a mano de elchecf.es/lopd y elchecf.es/nota-legal (verificado agosto 2026) e integrado como texto en `feature/profile/legal/LegalContent.kt`, con el estilo tipográfico de la app |
 | 2026-08-25 | Perfil (nombre y avatar) pasa a ser mutable en memoria (`ProfileDataSource.profile: StateFlow`) | Mismo patrón que `AuthRepository.isLoggedIn`: editar en "Información personal" o el selector de avatar necesita reflejarse al momento en toda la pantalla, no solo al recargar |
+| 2026-08-25 | `withHostTest {}` añadido al bloque `android {}` de `composeApp` | El plugin `com.android.kotlin.multiplatform.library` (AGP 9) ignora `commonTest` para Android sin esto — sin él, los tests solo se compilaban para iOS (no ejecutable aquí) y nunca se llegaban a correr de verdad |
 
 ---
 
@@ -445,3 +446,9 @@ Notas de diseño de red (Fase 8):
 - Política de privacidad y Condiciones legales dejan de estar inertes: pantalla nativa (`feature/profile/legal/`) con el contenido real de elchecf.es/lopd y elchecf.es/nota-legal (verificado agosto 2026), no una WebView — el usuario lo pidió explícitamente (ver §12).
 - `UserProfile` pasa de `fullName` a `firstName`/`lastName` (con `fullName` calculado) para que la edición por separado tenga sentido. El perfil entero pasa a ser mutable en memoria vía `ProfileDataSource.profile: StateFlow`, mismo patrón que `AuthRepository.isLoggedIn` (ver §12) — editar nombre o avatar se ve reflejado al instante en toda la pantalla.
 - Verificado en emulador: selector de avatar aplica el escudo al momento, Notificaciones y Directo iguales a la referencia de diseño aportada, Política de privacidad muestra el texto real navegando con "Volver", Cookies con sus 3 interruptores.
+
+### Limpieza de deuda técnica — 2026-08-25
+
+- **Deduplicación de UI:** `ElcheSheetHeader` (`designsystem/component`) sustituye tres copias manuales del patrón "título + botón cerrar" repetidas en `ProfileScreen.kt`, `ProfileSheets.kt` y `AvatarPickerSheet.kt` — mismo aspecto, un solo sitio para mantenerlo.
+- **`ProfileScreen.kt` partido** (era un único archivo de 472 líneas mezclando orquestación, pantalla principal y beneficios): `ProfileScreen.kt` se queda solo con la máquina de estados de sub-pantallas/hojas; `ProfileMainScreen.kt` (cabecera, secciones, `ConfigRow`) y `BenefitViews.kt` (fila y hoja de detalle de un beneficio) pasan a ser archivos propios.
+- **Tests de ViewModels** (CLAUDE.md §7 lo daba por hecho desde la Fase 4, nunca se había implementado): `commonTest` con `kotlin.test` + `kotlinx-coroutines-test` + Turbine (ver §12 sobre `withHostTest`). Cobertura de los 5 ViewModels existentes con fakes de sus repositorios — `ProfileViewModel`, `ForYouViewModel`, `StandingsViewModel`, `MonthlyCalendarViewModel`, `PlayersViewModel` (22 tests, `./gradlew :composeApp:testAndroidHostTest`). Solo se ejecutan en el target Android (JVM) en este entorno; el target iOS compila pero no se puede correr sin Mac.
