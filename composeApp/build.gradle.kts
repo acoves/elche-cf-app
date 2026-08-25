@@ -41,6 +41,11 @@ kotlin {
         androidResources {
             enable = true
         }
+
+        // Habilita el source set commonTest/androidUnitTest como tests JVM (CLAUDE.md §7):
+        // sin esto AGP 9 (plugin com.android.kotlin.multiplatform.library) ignora commonTest
+        // para Android y solo compila los tests para los targets iOS.
+        withHostTest {}
     }
 
     listOf(
@@ -95,6 +100,11 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
         }
     }
 

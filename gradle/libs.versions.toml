@@ -14,6 +14,7 @@ androidxActivityCompose = "1.13.0"
 ktlintGradle = "14.2.0"
 webviewMultiplatform = "2.0.3"
 androidxWebkit = "1.13.0"
+turbine = "1.2.1"
 
 [libraries]
 # Koin — usado desde el chunk 3
@@ -25,8 +26,12 @@ koin-android = { module = "io.insert-koin:koin-android" }
 
 # Reservado para Fase 4+ (dominio/datos)
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+
+# Tests de ViewModels (CLAUDE.md §7): commonTest con kotlin.test + turbine para StateFlow
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # Reservado para Fase 8 (red)
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
