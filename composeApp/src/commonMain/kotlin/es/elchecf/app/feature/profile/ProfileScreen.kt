@@ -13,6 +13,7 @@ import es.elchecf.app.domain.model.UserProfile
 import es.elchecf.app.feature.profile.legal.LegalScreen
 import es.elchecf.app.feature.profile.legal.LegalTermsContent
 import es.elchecf.app.feature.profile.legal.PrivacyPolicyContent
+import es.elchecf.app.feature.showcase.FranjaShowcaseScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 private sealed interface ProfileSubScreen {
@@ -25,6 +26,9 @@ private sealed interface ProfileSubScreen {
     data object PrivacyPolicy : ProfileSubScreen
 
     data object LegalTerms : ProfileSubScreen
+
+    /** Temporal — ver [FranjaShowcaseScreen]. */
+    data object FranjaShowcase : ProfileSubScreen
 }
 
 private sealed interface ProfileSheet {
@@ -77,6 +81,7 @@ fun ProfileScreen(
                 onPrivacyClick = { subScreen = ProfileSubScreen.PrivacyPolicy },
                 onLegalClick = { subScreen = ProfileSubScreen.LegalTerms },
                 onBenefitMoreClick = { selectedBenefit = it },
+                onFranjaShowcaseClick = { subScreen = ProfileSubScreen.FranjaShowcase },
             )
         ProfileSubScreen.Notifications ->
             NotificationsScreen(
@@ -89,6 +94,8 @@ fun ProfileScreen(
             LegalScreen(page = PrivacyPolicyContent, onBack = { subScreen = ProfileSubScreen.Main })
         ProfileSubScreen.LegalTerms ->
             LegalScreen(page = LegalTermsContent, onBack = { subScreen = ProfileSubScreen.Main })
+        ProfileSubScreen.FranjaShowcase ->
+            FranjaShowcaseScreen(onBack = { subScreen = ProfileSubScreen.Main })
     }
 
     when (sheet) {

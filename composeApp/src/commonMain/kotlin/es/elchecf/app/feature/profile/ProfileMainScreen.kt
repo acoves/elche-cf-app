@@ -47,6 +47,7 @@ internal fun ProfileMainScreen(
     onPrivacyClick: () -> Unit,
     onLegalClick: () -> Unit,
     onBenefitMoreClick: (Benefit) -> Unit,
+    onFranjaShowcaseClick: () -> Unit,
 ) {
     Column(
         modifier =
@@ -102,6 +103,18 @@ internal fun ProfileMainScreen(
         Column(modifier = Modifier.padding(top = ElcheSpacing.md)) {
             ConfigRow(icon = ElcheProfileIcon.Privacy, label = "Política de privacidad", onClick = onPrivacyClick)
             ConfigRow(icon = ElcheProfileIcon.Legal, label = "Condiciones legales", onClick = onLegalClick)
+        }
+
+        // Fila temporal para decidir si se adopta la franja como firma de marca (ver
+        // feature/showcase/FranjaShowcaseScreen.kt) — quitar esta sección junto con ese archivo
+        // una vez decidido.
+        SectionHeader(title = "Extra", modifier = Modifier.padding(top = ElcheSpacing.xl))
+        Column(modifier = Modifier.padding(top = ElcheSpacing.md)) {
+            ConfigRow(
+                icon = ElcheProfileIcon.Preview,
+                label = "Vista previa: nueva franja",
+                onClick = onFranjaShowcaseClick,
+            )
         }
 
         if (uiState.isLoggedIn) {

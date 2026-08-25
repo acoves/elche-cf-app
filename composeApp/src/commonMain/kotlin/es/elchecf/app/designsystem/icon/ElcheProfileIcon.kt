@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
@@ -34,4 +35,7 @@ object ElcheProfileIcon {
     val Camera: ImageVector = Icons.Filled.CameraAlt
     val Visibility: ImageVector = Icons.Filled.Visibility
     val VisibilityOff: ImageVector = Icons.Filled.VisibilityOff
+
+    /** Solo para la fila temporal "Vista previa: nueva franja" — quitar si se retira esa fila. */
+    val Preview: ImageVector = Icons.Filled.AutoAwesome
 }
