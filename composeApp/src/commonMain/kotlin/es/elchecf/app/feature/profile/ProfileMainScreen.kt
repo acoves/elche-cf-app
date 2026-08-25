@@ -112,7 +112,7 @@ internal fun ProfileMainScreen(
         Column(modifier = Modifier.padding(top = ElcheSpacing.md)) {
             ConfigRow(
                 icon = ElcheProfileIcon.Preview,
-                label = "Vista previa: nueva franja",
+                label = "Vista previa: detalles",
                 onClick = onFranjaShowcaseClick,
             )
         }
