@@ -7,9 +7,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** FASE 7: sesión en memoria, empieza como socio ya conectado — no hay pantalla de credenciales todavía. */
+/** Sesión en memoria. Empieza deslogueado (mejora post-Fase 7: pantalla de bienvenida al
+ * arrancar sin sesión, ver `feature/onboarding/OnboardingScreen.kt`) — antes empezaba como socio
+ * ya conectado porque no existía ninguna pantalla de login todavía. */
 class MockAuthDataSource : AuthDataSource {
-    private val _isLoggedIn = MutableStateFlow(true)
+    private val _isLoggedIn = MutableStateFlow(false)
     override val isLoggedIn: StateFlow<Boolean> = _isLoggedIn
 
     override suspend fun login(): AppResult<Unit, AppError> {

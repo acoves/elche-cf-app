@@ -97,6 +97,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.webkit)
+            implementation(libs.androidx.media3.exoplayer)
+            implementation(libs.androidx.media3.ui)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

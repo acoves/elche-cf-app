@@ -1,13 +1,16 @@
 package es.elchecf.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -17,11 +20,15 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import es.elchecf.app.core.webview.prefetchShopWebView
 import es.elchecf.app.designsystem.theme.ElcheTheme
+import es.elchecf.app.domain.repository.AuthRepository
+import es.elchecf.app.feature.onboarding.OnboardingScreen
 import es.elchecf.app.feature.shop.ShopTab
 import es.elchecf.app.feature.shop.TIENDA_URL
 import es.elchecf.app.navigation.ElcheBottomBar
 import es.elchecf.app.navigation.RootNavHost
 import es.elchecf.app.navigation.Route
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun App() {
@@ -60,25 +67,41 @@ fun App() {
         // se quedan con su carga normal, al seleccionarlas el usuario.
         LaunchedEffect(Unit) { prefetchShopWebView(TIENDA_URL) }
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            bottomBar = {
-                ElcheBottomBar(
-                    currentRoute = currentRoute,
-                    onSelect = { route -> navigateToTab(route) },
-                )
-            },
-        ) { innerPadding ->
-            RootNavHost(
-                navController = navController,
-                requestedShopTab = requestedShopTab,
-                onShopTabConsumed = { requestedShopTab = null },
-                onNavigateToMembership = {
-                    requestedShopTab = ShopTab.Membership
-                    navigateToTab(Route.Shop)
+        val authRepository = koinInject<AuthRepository>()
+        val isLoggedIn by authRepository.isLoggedIn.collectAsState()
+        val coroutineScope = rememberCoroutineScope()
+        // Se puede omitir para esta sesión de la app sin iniciar sesión de verdad — al volver a
+        // arrancar la app (proceso nuevo) se vuelve a mostrar, tal como se pidió.
+        var onboardingSkipped by remember { mutableStateOf(false) }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                bottomBar = {
+                    ElcheBottomBar(
+                        currentRoute = currentRoute,
+                        onSelect = { route -> navigateToTab(route) },
+                    )
                 },
-                modifier = Modifier.padding(innerPadding),
-            )
+            ) { innerPadding ->
+                RootNavHost(
+                    navController = navController,
+                    requestedShopTab = requestedShopTab,
+                    onShopTabConsumed = { requestedShopTab = null },
+                    onNavigateToMembership = {
+                        requestedShopTab = ShopTab.Membership
+                        navigateToTab(Route.Shop)
+                    },
+                    modifier = Modifier.padding(innerPadding),
+                )
+            }
+
+            if (!isLoggedIn && !onboardingSkipped) {
+                OnboardingScreen(
+                    onLogin = { coroutineScope.launch { authRepository.login() } },
+                    onSkip = { onboardingSkipped = true },
+                )
+            }
         }
     }
 }
