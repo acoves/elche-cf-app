@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import es.elchecf.app.designsystem.theme.ElcheTheme
 import es.elchecf.app.domain.model.Benefit
 import es.elchecf.app.domain.model.UserProfile
+import es.elchecf.app.feature.game.datigol.DatigolJumpScreen
 import es.elchecf.app.feature.profile.legal.LegalScreen
 import es.elchecf.app.feature.profile.legal.LegalTermsContent
 import es.elchecf.app.feature.profile.legal.PrivacyPolicyContent
@@ -29,6 +30,9 @@ private sealed interface ProfileSubScreen {
 
     /** Temporal — ver [FranjaShowcaseScreen]. */
     data object FranjaShowcase : ProfileSubScreen
+
+    /** Temporal — ver [DatigolJumpScreen]. */
+    data object DatigolGame : ProfileSubScreen
 }
 
 private sealed interface ProfileSheet {
@@ -82,6 +86,7 @@ fun ProfileScreen(
                 onLegalClick = { subScreen = ProfileSubScreen.LegalTerms },
                 onBenefitMoreClick = { selectedBenefit = it },
                 onFranjaShowcaseClick = { subScreen = ProfileSubScreen.FranjaShowcase },
+                onDatigolGameClick = { subScreen = ProfileSubScreen.DatigolGame },
             )
         ProfileSubScreen.Notifications ->
             NotificationsScreen(
@@ -96,6 +101,8 @@ fun ProfileScreen(
             LegalScreen(page = LegalTermsContent, onBack = { subScreen = ProfileSubScreen.Main })
         ProfileSubScreen.FranjaShowcase ->
             FranjaShowcaseScreen(onBack = { subScreen = ProfileSubScreen.Main })
+        ProfileSubScreen.DatigolGame ->
+            DatigolJumpScreen(onBack = { subScreen = ProfileSubScreen.Main })
     }
 
     when (sheet) {

@@ -48,6 +48,7 @@ internal fun ProfileMainScreen(
     onLegalClick: () -> Unit,
     onBenefitMoreClick: (Benefit) -> Unit,
     onFranjaShowcaseClick: () -> Unit,
+    onDatigolGameClick: () -> Unit,
 ) {
     Column(
         modifier =
@@ -114,6 +115,11 @@ internal fun ProfileMainScreen(
                 icon = ElcheProfileIcon.Preview,
                 label = "Vista previa: detalles",
                 onClick = onFranjaShowcaseClick,
+            )
+            ConfigRow(
+                icon = ElcheProfileIcon.Game,
+                label = "Datigol Jump (minijuego)",
+                onClick = onDatigolGameClick,
             )
         }
 
