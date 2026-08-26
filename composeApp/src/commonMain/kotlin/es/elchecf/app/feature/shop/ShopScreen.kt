@@ -28,8 +28,9 @@ enum class ShopTab(
     Tienda("Tienda", "Tienda", TIENDA_URL),
     Entradas("Entradas", "Entradas", "https://entradas.elchecf.es"),
 
-    // FASE 6: sin URL a propósito — contenido de Membership pendiente de decidir, no hay nada que
-    // cargar todavía (antes apuntaba a la home del club, que no era la sección real de abonados).
+    // Sin URL a propósito: Membership ya no es un WebView, tiene contenido nativo propio
+    // (ver MembershipContent.kt) — antes apuntaba a la home del club, que no era la sección
+    // real de abonados.
     Membership("Membership", "Membership", null),
 }
 
@@ -58,9 +59,13 @@ fun ShopScreen(
             label = { it.label },
             modifier = Modifier.padding(horizontal = ElcheSpacing.lg, vertical = ElcheSpacing.sm),
         )
-        val url = selectedTab.url
-        if (url != null) {
-            AppWebView(url = url, title = selectedTab.title, modifier = Modifier.weight(1f))
+        if (selectedTab == ShopTab.Membership) {
+            MembershipContent(modifier = Modifier.weight(1f))
+        } else {
+            val url = selectedTab.url
+            if (url != null) {
+                AppWebView(url = url, title = selectedTab.title, modifier = Modifier.weight(1f))
+            }
         }
     }
 }
