@@ -10,13 +10,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import es.elchecf.app.designsystem.component.SectionHeader
 import es.elchecf.app.designsystem.component.VersusCard
 import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
 import es.elchecf.app.domain.model.MatchStatus
+import es.elchecf.app.feature.gamezone.GameZoneScreen
 import org.koin.compose.viewmodel.koinViewModel
+
+private sealed interface ForYouSubScreen {
+    data object Main : ForYouSubScreen
+
+    data object GameZone : ForYouSubScreen
+}
 
 @Composable
 fun ForYouRoute(
@@ -47,6 +57,16 @@ fun ForYouScreen(
     onStoreClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    var subScreen by remember { mutableStateOf<ForYouSubScreen>(ForYouSubScreen.Main) }
+
+    when (subScreen) {
+        ForYouSubScreen.GameZone -> {
+            GameZoneScreen(onBack = { subScreen = ForYouSubScreen.Main })
+            return
+        }
+        ForYouSubScreen.Main -> Unit
+    }
+
     Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Column(modifier = Modifier.padding(horizontal = ElcheSpacing.screenMargin)) {
             SectionHeader(title = "Para ti", modifier = Modifier.padding(top = ElcheSpacing.screenMargin))
@@ -95,9 +115,14 @@ fun ForYouScreen(
             }
         }
 
+        GameZoneBanner(
+            onGameZoneClick = { subScreen = ForYouSubScreen.GameZone },
+            modifier = Modifier.padding(horizontal = ElcheSpacing.screenMargin, vertical = ElcheSpacing.xxl),
+        )
+
         StoreCarouselSection(
             onStoreClick = onStoreClick,
-            modifier = Modifier.padding(top = ElcheSpacing.xxl, bottom = ElcheSpacing.xl),
+            modifier = Modifier.padding(bottom = ElcheSpacing.xl),
         )
     }
 }
