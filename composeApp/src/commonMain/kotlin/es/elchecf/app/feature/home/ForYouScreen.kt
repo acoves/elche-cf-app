@@ -19,7 +19,10 @@ import es.elchecf.app.domain.model.MatchStatus
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ForYouRoute(modifier: Modifier = Modifier) {
+fun ForYouRoute(
+    onNavigateToShop: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     val viewModel = koinViewModel<ForYouViewModel>()
     val uiState by viewModel.uiState.collectAsState()
 
@@ -29,6 +32,7 @@ fun ForYouRoute(modifier: Modifier = Modifier) {
         onFichaDelPartidoClick = {}, // FASE 5: navegar a la ficha del partido cuando exista esa pantalla
         onPlayQuizClick = {}, // FASE del quiz sin numerar todavía en CLAUDE.md §8
         onValorarClick = {}, // FASE del quiz sin numerar todavía en CLAUDE.md §8
+        onStoreClick = onNavigateToShop,
         modifier = modifier,
     )
 }
@@ -40,57 +44,60 @@ fun ForYouScreen(
     onFichaDelPartidoClick: () -> Unit,
     onPlayQuizClick: () -> Unit,
     onValorarClick: () -> Unit,
+    onStoreClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(ElcheSpacing.screenMargin),
-    ) {
-        SectionHeader(title = "Para ti")
+    Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(modifier = Modifier.padding(horizontal = ElcheSpacing.screenMargin)) {
+            SectionHeader(title = "Para ti", modifier = Modifier.padding(top = ElcheSpacing.screenMargin))
 
-        val match = uiState.match
-        when {
-            uiState.isLoading -> Text(text = "Cargando…", style = ElcheTheme.typography.bodyS)
-            // Un error de carga (sin partido) bloquea la pantalla; un error de acción (p.ej. al
-            // enviar la predicción, con partido ya cargado) solo se muestra como aviso más abajo.
-            match == null && uiState.error != null ->
-                Text(text = uiState.error, style = ElcheTheme.typography.bodyS)
-            match == null -> Text(text = "No hay próximo partido programado.", style = ElcheTheme.typography.bodyS)
-            else -> {
-                VersusCard(
-                    match = match,
-                    onFichaDelPartidoClick = onFichaDelPartidoClick,
-                    modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
-                )
-                PredictorCard(
-                    home = match.home,
-                    away = match.away,
-                    locked = uiState.predictionSent || match.status != MatchStatus.Scheduled,
-                    onSubmit = onSubmitPrediction,
-                    modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
-                )
-                QuizCard(
-                    score = uiState.quizScore,
-                    onPlayClick = onPlayQuizClick,
-                    modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
-                )
-                if (uiState.showValorateMatch) {
-                    ValorateMatchCard(
-                        onValorarClick = onValorarClick,
+            val match = uiState.match
+            when {
+                uiState.isLoading -> Text(text = "Cargando…", style = ElcheTheme.typography.bodyS)
+                // Un error de carga (sin partido) bloquea la pantalla; un error de acción (p.ej.
+                // al enviar la predicción, con partido ya cargado) solo se muestra como aviso más
+                // abajo.
+                match == null && uiState.error != null ->
+                    Text(text = uiState.error, style = ElcheTheme.typography.bodyS)
+                match == null -> Text(text = "No hay próximo partido programado.", style = ElcheTheme.typography.bodyS)
+                else -> {
+                    VersusCard(
+                        match = match,
+                        onFichaDelPartidoClick = onFichaDelPartidoClick,
                         modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
                     )
-                }
-                if (uiState.error != null) {
-                    Text(
-                        text = uiState.error,
-                        style = ElcheTheme.typography.bodyS,
-                        modifier = Modifier.padding(top = ElcheSpacing.md),
+                    PredictorCard(
+                        home = match.home,
+                        away = match.away,
+                        locked = uiState.predictionSent || match.status != MatchStatus.Scheduled,
+                        onSubmit = onSubmitPrediction,
+                        modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
                     )
+                    QuizCard(
+                        score = uiState.quizScore,
+                        onPlayClick = onPlayQuizClick,
+                        modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                    )
+                    if (uiState.showValorateMatch) {
+                        ValorateMatchCard(
+                            onValorarClick = onValorarClick,
+                            modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+                        )
+                    }
+                    if (uiState.error != null) {
+                        Text(
+                            text = uiState.error,
+                            style = ElcheTheme.typography.bodyS,
+                            modifier = Modifier.padding(top = ElcheSpacing.md),
+                        )
+                    }
                 }
             }
         }
+
+        StoreCarouselSection(
+            onStoreClick = onStoreClick,
+            modifier = Modifier.padding(top = ElcheSpacing.xxl, bottom = ElcheSpacing.xl),
+        )
     }
 }

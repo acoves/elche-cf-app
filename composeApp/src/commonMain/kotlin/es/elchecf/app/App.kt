@@ -92,6 +92,7 @@ fun App() {
                         requestedShopTab = ShopTab.Membership
                         navigateToTab(Route.Shop)
                     },
+                    onNavigateToShop = { navigateToTab(Route.Shop) },
                     modifier = Modifier.padding(innerPadding),
                 )
             }

@@ -27,6 +27,7 @@ fun RootNavHost(
     requestedShopTab: ShopTab?,
     onShopTabConsumed: () -> Unit,
     onNavigateToMembership: () -> Unit,
+    onNavigateToShop: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -38,7 +39,7 @@ fun RootNavHost(
         popEnterTransition = { fadeIn(tween(TAB_FADE_MS)) },
         popExitTransition = { fadeOut(tween(TAB_FADE_MS)) },
     ) {
-        composable<Route.ForYou> { ForYouRoute() }
+        composable<Route.ForYou> { ForYouRoute(onNavigateToShop = onNavigateToShop) }
         composable<Route.Calendar> { CalendarScreen() }
         composable<Route.Clips> { ClipsScreen() }
         composable<Route.Shop> {
