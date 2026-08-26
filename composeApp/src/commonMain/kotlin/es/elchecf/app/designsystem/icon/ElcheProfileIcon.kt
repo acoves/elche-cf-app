@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,7 +38,4 @@ object ElcheProfileIcon {
 
     /** Solo para la fila temporal "Vista previa: nueva franja" — quitar si se retira esa fila. */
     val Preview: ImageVector = Icons.Filled.AutoAwesome
-
-    /** Solo para la fila temporal del minijuego "Datigol Jump" — quitar si se retira esa fila. */
-    val Game: ImageVector = Icons.Filled.SportsEsports
 }
