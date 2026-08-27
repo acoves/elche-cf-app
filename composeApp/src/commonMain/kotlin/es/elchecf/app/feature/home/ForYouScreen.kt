@@ -73,7 +73,7 @@ fun ForYouScreen(
     when (subScreen) {
         ForYouSubScreen.Main -> Unit
         ForYouSubScreen.GameZone -> {
-            GameZoneScreen(onBack = { subScreen = ForYouSubScreen.Main })
+            GameZoneScreen(match = uiState.match, onBack = { subScreen = ForYouSubScreen.Main })
             return
         }
         ForYouSubScreen.FavoritePlayersSelect -> {

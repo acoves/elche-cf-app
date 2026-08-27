@@ -33,24 +33,32 @@ import es.elchecf.app.designsystem.theme.ElcheColor
 import es.elchecf.app.designsystem.theme.ElcheShape
 import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
+import es.elchecf.app.domain.model.Match
 import es.elchecf.app.feature.game.datigol.DatigolJumpScreen
 import es.elchecf.app.feature.game.datigol.datigolIdleSprite
 import es.elchecf.app.feature.game.pixelart.drawPixelSprite
+import es.elchecf.app.feature.gamezone.lineup.LineupPredictorScreen
+import es.elchecf.app.feature.gamezone.lineup.lineupFormations
 
 private sealed interface GameZoneSubScreen {
     data object Hub : GameZoneSubScreen
 
     data object DatigolJump : GameZoneSubScreen
+
+    data object LineupPredictor : GameZoneSubScreen
 }
 
 /**
  * Hub de minijuegos "Game Zone" (se llega desde el banner de "Para ti"): fondo oscuro con
- * degradado verde Elche, inspirado en el "Activity Hub" de la app del Chelsea. Por ahora Datigol
- * Jump es el único juego real; el resto son tarjetas "muy pronto" honestas, no funcionalidades
- * simuladas.
+ * degradado verde Elche, inspirado en el "Activity Hub" de la app del Chelsea. Datigol Jump y
+ * Predice el once son juegos reales; el resto son tarjetas "muy pronto" honestas, no
+ * funcionalidades simuladas.
  */
 @Composable
-fun GameZoneScreen(onBack: () -> Unit) {
+fun GameZoneScreen(
+    match: Match?,
+    onBack: () -> Unit,
+) {
     var subScreen by remember { mutableStateOf<GameZoneSubScreen>(GameZoneSubScreen.Hub) }
 
     when (subScreen) {
@@ -58,9 +66,12 @@ fun GameZoneScreen(onBack: () -> Unit) {
             GameZoneHub(
                 onBack = onBack,
                 onPlayDatigol = { subScreen = GameZoneSubScreen.DatigolJump },
+                onPlayLineupPredictor = { subScreen = GameZoneSubScreen.LineupPredictor },
             )
         GameZoneSubScreen.DatigolJump ->
             DatigolJumpScreen(onBack = { subScreen = GameZoneSubScreen.Hub })
+        GameZoneSubScreen.LineupPredictor ->
+            LineupPredictorScreen(match = match, onBack = { subScreen = GameZoneSubScreen.Hub })
     }
 }
 
@@ -68,6 +79,7 @@ fun GameZoneScreen(onBack: () -> Unit) {
 private fun GameZoneHub(
     onBack: () -> Unit,
     onPlayDatigol: () -> Unit,
+    onPlayLineupPredictor: () -> Unit,
 ) {
     Column(
         modifier =
@@ -106,8 +118,8 @@ private fun GameZoneHub(
                 modifier = Modifier.padding(bottom = ElcheSpacing.lg),
             )
             DatigolJumpCard(onPlayClick = onPlayDatigol)
-            ComingSoonCard(
-                title = "Predictor Franjiverde",
+            LineupPredictorCard(
+                onPlayClick = onPlayLineupPredictor,
                 modifier = Modifier.padding(top = ElcheSpacing.md),
             )
             ComingSoonCard(
@@ -151,6 +163,59 @@ private fun DatigolJumpCard(
                 Text(text = "DATIGOL JUMP", style = ElcheTheme.typography.titleM, color = ElcheColor.White)
                 Text(
                     text = "Salta de plataforma en plataforma con Datigol",
+                    style = ElcheTheme.typography.bodyS,
+                    color = ElcheColor.White.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(top = ElcheSpacing.xs),
+                )
+            }
+        }
+        ElcheButton(
+            text = "Jugar",
+            onClick = onPlayClick,
+            variant = ElcheButtonVariant.Accent,
+            modifier = Modifier.fillMaxWidth().padding(top = ElcheSpacing.lg),
+        )
+    }
+}
+
+@Composable
+private fun LineupPredictorCard(
+    onPlayClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(ElcheShape.CardLarge)
+                .background(ElcheColor.Green.copy(alpha = 0.16f))
+                .border(width = 1.dp, color = ElcheColor.Green.copy(alpha = 0.5f), shape = ElcheShape.CardLarge)
+                .padding(ElcheSpacing.lg),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(72.dp).clip(ElcheShape.Card).background(ElcheColor.Ink),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.size(52.dp)) {
+                    val dotRadius = size.minDimension * 0.06f
+                    lineupFormations.first().slots.forEach { slot ->
+                        drawCircle(
+                            color = ElcheColor.Gold,
+                            radius = dotRadius,
+                            center =
+                                Offset(
+                                    size.width * slot.x,
+                                    size.height * slot.y,
+                                ),
+                        )
+                    }
+                }
+            }
+            Column(modifier = Modifier.weight(1f).padding(start = ElcheSpacing.md)) {
+                Text(text = "PREDICE EL ONCE", style = ElcheTheme.typography.titleM, color = ElcheColor.White)
+                Text(
+                    text = "Arma tu alineación antes de que se sepa la real",
                     style = ElcheTheme.typography.bodyS,
                     color = ElcheColor.White.copy(alpha = 0.7f),
                     modifier = Modifier.padding(top = ElcheSpacing.xs),

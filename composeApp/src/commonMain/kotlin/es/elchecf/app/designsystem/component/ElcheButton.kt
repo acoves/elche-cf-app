@@ -30,12 +30,25 @@ fun ElcheButton(
     variant: ElcheButtonVariant = ElcheButtonVariant.Primary,
     enabled: Boolean = true,
 ) {
+    // Colores explícitos también para "disabled": los por defecto de Material3 se basan en
+    // onSurface, pensados para fondos claros — en las pantallas oscuras (Game Zone) dejaban el
+    // botón deshabilitado sin ninguna forma visible, como si fuera solo texto suelto.
     val colors =
         when (variant) {
             ElcheButtonVariant.Primary ->
-                ButtonDefaults.buttonColors(containerColor = ElcheColor.Green, contentColor = ElcheColor.White)
+                ButtonDefaults.buttonColors(
+                    containerColor = ElcheColor.Green,
+                    contentColor = ElcheColor.White,
+                    disabledContainerColor = ElcheColor.Green.copy(alpha = 0.35f),
+                    disabledContentColor = ElcheColor.White.copy(alpha = 0.7f),
+                )
             ElcheButtonVariant.Accent ->
-                ButtonDefaults.buttonColors(containerColor = ElcheColor.Gold, contentColor = ElcheColor.GoldDeep)
+                ButtonDefaults.buttonColors(
+                    containerColor = ElcheColor.Gold,
+                    contentColor = ElcheColor.GoldDeep,
+                    disabledContainerColor = ElcheColor.Gold.copy(alpha = 0.35f),
+                    disabledContentColor = ElcheColor.GoldDeep.copy(alpha = 0.7f),
+                )
         }
 
     Button(
