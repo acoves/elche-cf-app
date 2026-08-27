@@ -20,12 +20,20 @@ import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
 import es.elchecf.app.domain.model.MatchStatus
 import es.elchecf.app.feature.gamezone.GameZoneScreen
+import es.elchecf.app.feature.home.favoriteplayers.FavoriteCaptainSelectScreen
+import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersCard
+import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersSelectScreen
+import es.elchecf.app.feature.home.favoriteplayers.elcheSquad2627
 import org.koin.compose.viewmodel.koinViewModel
 
 private sealed interface ForYouSubScreen {
     data object Main : ForYouSubScreen
 
     data object GameZone : ForYouSubScreen
+
+    data object FavoritePlayersSelect : ForYouSubScreen
+
+    data object FavoriteCaptainSelect : ForYouSubScreen
 }
 
 @Composable
@@ -58,13 +66,39 @@ fun ForYouScreen(
     modifier: Modifier = Modifier,
 ) {
     var subScreen by remember { mutableStateOf<ForYouSubScreen>(ForYouSubScreen.Main) }
+    var favoritePlayerNumbers by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var captainNumber by remember { mutableStateOf<Int?>(null) }
 
     when (subScreen) {
+        ForYouSubScreen.Main -> Unit
         ForYouSubScreen.GameZone -> {
             GameZoneScreen(onBack = { subScreen = ForYouSubScreen.Main })
             return
         }
-        ForYouSubScreen.Main -> Unit
+        ForYouSubScreen.FavoritePlayersSelect -> {
+            FavoritePlayersSelectScreen(
+                initialSelection = favoritePlayerNumbers,
+                onBack = { subScreen = ForYouSubScreen.Main },
+                onContinue = { selection ->
+                    favoritePlayerNumbers = selection
+                    if (captainNumber !in selection) captainNumber = null
+                    subScreen = ForYouSubScreen.FavoriteCaptainSelect
+                },
+            )
+            return
+        }
+        ForYouSubScreen.FavoriteCaptainSelect -> {
+            FavoriteCaptainSelectScreen(
+                favorites = elcheSquad2627.filter { it.number in favoritePlayerNumbers },
+                initialCaptain = captainNumber,
+                onBack = { subScreen = ForYouSubScreen.FavoritePlayersSelect },
+                onConfirm = { number ->
+                    captainNumber = number
+                    subScreen = ForYouSubScreen.Main
+                },
+            )
+            return
+        }
     }
 
     Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -122,7 +156,19 @@ fun ForYouScreen(
 
         StoreCarouselSection(
             onStoreClick = onStoreClick,
-            modifier = Modifier.padding(bottom = ElcheSpacing.xl),
+            modifier = Modifier.padding(bottom = ElcheSpacing.xxl),
+        )
+
+        FavoritePlayersCard(
+            favorites = elcheSquad2627.filter { it.number in favoritePlayerNumbers },
+            captain = elcheSquad2627.find { it.number == captainNumber },
+            onEditClick = { subScreen = ForYouSubScreen.FavoritePlayersSelect },
+            onBuyShirtClick = onStoreClick,
+            modifier =
+                Modifier.fillMaxWidth().padding(
+                    horizontal = ElcheSpacing.screenMargin,
+                    vertical = ElcheSpacing.xl,
+                ),
         )
     }
 }
