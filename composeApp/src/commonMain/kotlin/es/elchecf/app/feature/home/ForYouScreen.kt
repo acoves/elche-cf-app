@@ -18,12 +18,14 @@ import es.elchecf.app.designsystem.component.SectionHeader
 import es.elchecf.app.designsystem.component.VersusCard
 import es.elchecf.app.designsystem.theme.ElcheSpacing
 import es.elchecf.app.designsystem.theme.ElcheTheme
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.domain.model.MatchStatus
 import es.elchecf.app.feature.gamezone.GameZoneScreen
 import es.elchecf.app.feature.home.favoriteplayers.FavoriteCaptainSelectScreen
 import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersCard
 import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersSelectScreen
 import es.elchecf.app.feature.home.favoriteplayers.elcheSquad2627
+import es.elchecf.app.feature.home.favoriteteam.FavoriteTeamsSection
 import es.elchecf.app.feature.home.news.NewsSection
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -69,6 +71,7 @@ fun ForYouScreen(
     var subScreen by remember { mutableStateOf<ForYouSubScreen>(ForYouSubScreen.Main) }
     var favoritePlayerNumbers by remember { mutableStateOf<Set<Int>>(emptySet()) }
     var captainNumber by remember { mutableStateOf<Int?>(null) }
+    var favoriteTeams by remember { mutableStateOf<Set<ClubTeam>>(emptySet()) }
 
     when (subScreen) {
         ForYouSubScreen.Main -> Unit
@@ -185,8 +188,23 @@ fun ForYouScreen(
             onBuyShirtClick = onStoreClick,
             modifier =
                 Modifier.fillMaxWidth().padding(
-                    horizontal = ElcheSpacing.screenMargin,
-                    vertical = ElcheSpacing.xl,
+                    start = ElcheSpacing.screenMargin,
+                    end = ElcheSpacing.screenMargin,
+                    top = ElcheSpacing.xl,
+                ),
+        )
+
+        FavoriteTeamsSection(
+            selectedTeams = favoriteTeams,
+            onToggle = { team ->
+                favoriteTeams = if (team in favoriteTeams) favoriteTeams - team else favoriteTeams + team
+            },
+            modifier =
+                Modifier.fillMaxWidth().padding(
+                    start = ElcheSpacing.screenMargin,
+                    end = ElcheSpacing.screenMargin,
+                    top = ElcheSpacing.xxl,
+                    bottom = ElcheSpacing.xxl,
                 ),
         )
     }
