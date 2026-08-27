@@ -24,6 +24,7 @@ import es.elchecf.app.feature.home.favoriteplayers.FavoriteCaptainSelectScreen
 import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersCard
 import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersSelectScreen
 import es.elchecf.app.feature.home.favoriteplayers.elcheSquad2627
+import es.elchecf.app.feature.home.news.NewsSection
 import org.koin.compose.viewmodel.koinViewModel
 
 private sealed interface ForYouSubScreen {
@@ -148,6 +149,24 @@ fun ForYouScreen(
                 }
             }
         }
+
+        PressConferenceBanner(
+            modifier =
+                Modifier.fillMaxWidth().padding(
+                    start = ElcheSpacing.screenMargin,
+                    end = ElcheSpacing.screenMargin,
+                    top = ElcheSpacing.xxl,
+                ),
+        )
+
+        NewsSection(
+            modifier =
+                Modifier.fillMaxWidth().padding(
+                    start = ElcheSpacing.screenMargin,
+                    end = ElcheSpacing.screenMargin,
+                    top = ElcheSpacing.xxl,
+                ),
+        )
 
         GameZoneBanner(
             onGameZoneClick = { subScreen = ForYouSubScreen.GameZone },
