@@ -21,7 +21,10 @@ private const val ELCHE_TEAM_ID = 285
 
 /** FASE 8: football-data.org real, solo para [ClubTeam.PrimerEquipo] — el plan gratuito no cubre
  * Liga F ni las categorías regionales (verificado agosto 2026, CLAUDE.md §12), así que Femenino e
- * Ilicitano caen a [MockMatchDataSource]. sendPrediction sigue mock: la API es de solo lectura. */
+ * Ilicitano caen a [MockMatchDataSource]. sendPrediction sigue mock: la API es de solo lectura.
+ * Si la llamada real falla (sin conexión, límite de peticiones del plan gratuito, timeout...)
+ * también cae a [MockMatchDataSource] en vez de dejar "Para ti" sin cuenta atrás/pronóstico/quiz:
+ * mejor mostrar datos de ejemplo que una pantalla muerta. */
 class FootballDataMatchDataSource(
     private val client: HttpClient,
 ) : MatchDataSource {
@@ -43,7 +46,7 @@ class FootballDataMatchDataSource(
                     }.body<MatchesResponseDto>()
             AppResult.Success(response.matches.map { it.toDomain() })
         } catch (e: Exception) {
-            AppResult.Failure(AppError.Network(e.message ?: "No se pudo cargar el calendario"))
+            mockFallback.fetchSeasonMatches(team)
         }
     }
 
