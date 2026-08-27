@@ -20,6 +20,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import es.elchecf.app.core.webview.prefetchShopWebView
 import es.elchecf.app.designsystem.theme.ElcheTheme
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.domain.repository.AuthRepository
 import es.elchecf.app.feature.onboarding.OnboardingScreen
 import es.elchecf.app.feature.shop.ShopTab
@@ -45,6 +46,7 @@ fun App() {
         val navController = rememberNavController()
         var currentRoute by remember { mutableStateOf<Route>(Route.ForYou) }
         var requestedShopTab by remember { mutableStateOf<ShopTab?>(null) }
+        var requestedCalendarTeam by remember { mutableStateOf<ClubTeam?>(null) }
 
         // Patrón estándar de bottom nav (sin esto, cada cambio de pestaña creaba una entrada
         // nueva en el back stack → ViewModel nuevo → "Cargando" otra vez y la pantalla
@@ -88,11 +90,17 @@ fun App() {
                     navController = navController,
                     requestedShopTab = requestedShopTab,
                     onShopTabConsumed = { requestedShopTab = null },
+                    requestedCalendarTeam = requestedCalendarTeam,
+                    onCalendarTeamConsumed = { requestedCalendarTeam = null },
                     onNavigateToMembership = {
                         requestedShopTab = ShopTab.Membership
                         navigateToTab(Route.Shop)
                     },
                     onNavigateToShop = { navigateToTab(Route.Shop) },
+                    onNavigateToCalendar = { team ->
+                        requestedCalendarTeam = team
+                        navigateToTab(Route.Calendar)
+                    },
                     modifier = Modifier.padding(innerPadding),
                 )
             }

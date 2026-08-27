@@ -25,7 +25,8 @@ import es.elchecf.app.feature.home.favoriteplayers.FavoriteCaptainSelectScreen
 import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersCard
 import es.elchecf.app.feature.home.favoriteplayers.FavoritePlayersSelectScreen
 import es.elchecf.app.feature.home.favoriteplayers.elcheSquad2627
-import es.elchecf.app.feature.home.favoriteteam.FavoriteTeamsSection
+import es.elchecf.app.feature.home.favoriteteam.FavoriteTeamsCard
+import es.elchecf.app.feature.home.favoriteteam.FavoriteTeamsSelectScreen
 import es.elchecf.app.feature.home.news.NewsSection
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -37,11 +38,14 @@ private sealed interface ForYouSubScreen {
     data object FavoritePlayersSelect : ForYouSubScreen
 
     data object FavoriteCaptainSelect : ForYouSubScreen
+
+    data object FavoriteTeamsSelect : ForYouSubScreen
 }
 
 @Composable
 fun ForYouRoute(
     onNavigateToShop: () -> Unit = {},
+    onNavigateToCalendar: (ClubTeam) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val viewModel = koinViewModel<ForYouViewModel>()
@@ -54,6 +58,7 @@ fun ForYouRoute(
         onPlayQuizClick = {}, // FASE del quiz sin numerar todavía en CLAUDE.md §8
         onValorarClick = {}, // FASE del quiz sin numerar todavía en CLAUDE.md §8
         onStoreClick = onNavigateToShop,
+        onNavigateToCalendar = onNavigateToCalendar,
         modifier = modifier,
     )
 }
@@ -66,6 +71,7 @@ fun ForYouScreen(
     onPlayQuizClick: () -> Unit,
     onValorarClick: () -> Unit,
     onStoreClick: () -> Unit = {},
+    onNavigateToCalendar: (ClubTeam) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var subScreen by remember { mutableStateOf<ForYouSubScreen>(ForYouSubScreen.Main) }
@@ -98,6 +104,17 @@ fun ForYouScreen(
                 onBack = { subScreen = ForYouSubScreen.FavoritePlayersSelect },
                 onConfirm = { number ->
                     captainNumber = number
+                    subScreen = ForYouSubScreen.Main
+                },
+            )
+            return
+        }
+        ForYouSubScreen.FavoriteTeamsSelect -> {
+            FavoriteTeamsSelectScreen(
+                initialSelection = favoriteTeams,
+                onBack = { subScreen = ForYouSubScreen.Main },
+                onSave = { selection ->
+                    favoriteTeams = selection
                     subScreen = ForYouSubScreen.Main
                 },
             )
@@ -194,11 +211,10 @@ fun ForYouScreen(
                 ),
         )
 
-        FavoriteTeamsSection(
-            selectedTeams = favoriteTeams,
-            onToggle = { team ->
-                favoriteTeams = if (team in favoriteTeams) favoriteTeams - team else favoriteTeams + team
-            },
+        FavoriteTeamsCard(
+            selectedTeams = ClubTeam.entries.filter { it in favoriteTeams },
+            onEditClick = { subScreen = ForYouSubScreen.FavoriteTeamsSelect },
+            onViewTeamClick = onNavigateToCalendar,
             modifier =
                 Modifier.fillMaxWidth().padding(
                     start = ElcheSpacing.screenMargin,

@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import es.elchecf.app.domain.model.ClubTeam
 import es.elchecf.app.feature.calendar.CalendarScreen
 import es.elchecf.app.feature.clips.ClipsScreen
 import es.elchecf.app.feature.home.ForYouRoute
@@ -26,8 +27,11 @@ fun RootNavHost(
     navController: NavHostController,
     requestedShopTab: ShopTab?,
     onShopTabConsumed: () -> Unit,
+    requestedCalendarTeam: ClubTeam?,
+    onCalendarTeamConsumed: () -> Unit,
     onNavigateToMembership: () -> Unit,
     onNavigateToShop: () -> Unit,
+    onNavigateToCalendar: (ClubTeam) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
@@ -39,8 +43,12 @@ fun RootNavHost(
         popEnterTransition = { fadeIn(tween(TAB_FADE_MS)) },
         popExitTransition = { fadeOut(tween(TAB_FADE_MS)) },
     ) {
-        composable<Route.ForYou> { ForYouRoute(onNavigateToShop = onNavigateToShop) }
-        composable<Route.Calendar> { CalendarScreen() }
+        composable<Route.ForYou> {
+            ForYouRoute(onNavigateToShop = onNavigateToShop, onNavigateToCalendar = onNavigateToCalendar)
+        }
+        composable<Route.Calendar> {
+            CalendarScreen(initialTeam = requestedCalendarTeam, onInitialTeamConsumed = onCalendarTeamConsumed)
+        }
         composable<Route.Clips> { ClipsScreen() }
         composable<Route.Shop> {
             ShopScreen(initialTab = requestedShopTab, onInitialTabConsumed = onShopTabConsumed)

@@ -12,6 +12,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,10 +37,21 @@ private enum class CalendarTab(
 }
 
 @Composable
-fun CalendarScreen(modifier: Modifier = Modifier) {
+fun CalendarScreen(
+    initialTeam: ClubTeam? = null,
+    onInitialTeamConsumed: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     var selectedTab by remember { mutableStateOf(CalendarTab.Calendario) }
-    var selectedTeam by remember { mutableStateOf(ClubTeam.PrimerEquipo) }
+    var selectedTeam by remember { mutableStateOf(initialTeam ?: ClubTeam.PrimerEquipo) }
     var showTeamPicker by remember { mutableStateOf(false) }
+
+    LaunchedEffect(initialTeam) {
+        if (initialTeam != null) {
+            selectedTeam = initialTeam
+            onInitialTeamConsumed()
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         TeamSelectorRow(
